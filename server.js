@@ -20,19 +20,34 @@ app.use((err, req, res, next) => {
 
 app.use(express.static(config.frontend))
 
+const daneEndpoint = '/dane'
 let dane = ''
 
-app.get('/test', (req, res) => {
+app.get(daneEndpoint, (req, res) => {
     res.json({ dane })
 })
 
-app.post('/test', (req, res) => {
+app.post(daneEndpoint, (req, res) => {
     if(req.body && req.body.dane) {
         dane = req.body.dane
         res.json({ dane, set: true })
     } else {
         res.status(400).json({ set: false })
     }
+})
+
+app.put(daneEndpoint, (req, res) => {
+    if(req.body && req.body.dane) {
+        dane += req.body.dane
+        res.json({ dane, set: true })
+    } else {
+        res.status(400).json({ set: false })
+    }
+})
+
+app.delete(daneEndpoint, (req, res) => {
+    dane = ''
+    res.json({ dane, set: true })
 })
 
 app.listen(config.port, () => {
