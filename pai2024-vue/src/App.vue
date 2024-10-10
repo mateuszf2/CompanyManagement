@@ -15,6 +15,10 @@ import TheWelcome from './components/TheWelcome.vue'
   <main>
     <TheWelcome />
   </main>
+
+  <div>
+    <v-btn>Vuetify</v-btn>
+  </div>
 </template>
 
 <style scoped>
