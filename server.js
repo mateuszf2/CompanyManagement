@@ -13,13 +13,28 @@ const app = express()
 app.use(morgan('tiny'))
 app.use(cors())
 app.use(bodyParser.json())
+app.use((err, req, res, next) => {
+    res.status(400).json({ error: err.message })
+})
+
 
 app.use(express.static(config.frontend))
 
-app.use('/test', (req, res) => {
-    res.json({ test: true })
+let dane = ''
+
+app.get('/test', (req, res) => {
+    res.json({ dane })
+})
+
+app.post('/test', (req, res) => {
+    if(req.body && req.body.dane) {
+        dane = req.body.dane
+        res.json({ dane, set: true })
+    } else {
+        res.status(400).json({ set: false })
+    }
 })
 
 app.listen(config.port, () => {
-    console.log('Backend listening on port', config.port)
+    console.log('Backend słucha na porcie', config.port)
 })
