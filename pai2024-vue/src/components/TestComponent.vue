@@ -59,6 +59,11 @@
                     console.error('Backend nie zwrócił odpowiedzi w formacie JSON')
                 })
               })
+           },
+           niepoprawneDane() {
+             // czy pierwszy znak jest literą
+             if(RegExp(/^\p{L}/, 'u').test(this.dane)) return false
+             return true
            }  
          },
         mounted() {
@@ -83,7 +88,7 @@
             <v-text-field label="Dane" v-model="dane"></v-text-field>
         </v-card-text>
         <v-card-actions>
-            <v-btn @click="ustaw()">Ustaw</v-btn>
+            <v-btn @click="ustaw()" :disabled="niepoprawneDane()">Ustaw</v-btn>
             <v-btn @click="rozszerz()">Rozszerz</v-btn>
             <v-btn @click="wyzeruj()">Wyzeruj</v-btn>
         </v-card-actions>
