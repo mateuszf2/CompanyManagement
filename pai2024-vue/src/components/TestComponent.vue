@@ -5,7 +5,14 @@
     export default {
         data() {
             return {
-                dane: ''
+                dane: '',
+                isValid: false,
+                rules: {
+                    startsWithLetter: value => {
+                        const pattern = /^\p{L}/u
+                        return pattern.test(value) || 'Wymagane zaczynanie się od litery'
+                    }
+                }
             }
         },
         methods: {
@@ -59,11 +66,6 @@
                     console.error('Backend nie zwrócił odpowiedzi w formacie JSON')
                 })
               })
-           },
-           niepoprawneDane() {
-             // czy pierwszy znak jest literą
-             if(RegExp(/^\p{L}/, 'u').test(this.dane)) return false
-             return true
            }  
          },
         mounted() {
@@ -82,19 +84,23 @@
 </script>
 
 <template>
-    <v-card variant="outlined">
-        <v-card-title>Wprowadź dane</v-card-title>
-        <v-card-subtitle>Dane muszą spełniać odpowiednie reguły, zarówno w tym formularzu, jak i w backendzie</v-card-subtitle>
-        <v-card-text>
-            <v-text-field variant="outlined" label="Dane" v-model="dane" hint="Ciąg musi rozpoczynać się od litery"></v-text-field>
-        </v-card-text>
-        <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" variant="elevated" @click="ustaw()" :disabled="niepoprawneDane()">Ustaw</v-btn>
-            <v-btn color="secondary" variant="elevated" @click="rozszerz()">Rozszerz</v-btn>
-            <v-btn color="error" variant="elevated" @click="wyzeruj()">Wyzeruj</v-btn>
-        </v-card-actions>
-    </v-card>
+    <v-form v-model="isValid">
+        <v-card variant="outlined">
+            <v-card-title>Wprowadź dane</v-card-title>
+            <v-card-subtitle>Dane muszą spełniać odpowiednie reguły, zarówno w tym formularzu, jak i w backendzie</v-card-subtitle>
+            <v-card-text>
+                <v-text-field variant="outlined" label="Dane" v-model="dane" :rules="[ rules.startsWithLetter ]"
+                    hint="Te dane będą wysłane do backendu">
+                </v-text-field>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" variant="elevated" @click="ustaw()" :disabled="!isValid">Ustaw</v-btn>
+                <v-btn color="secondary" variant="elevated" @click="rozszerz()">Rozszerz</v-btn>
+                <v-btn color="error" variant="elevated" @click="wyzeruj()">Wyzeruj</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-form>
 </template>
 
 <style scoped>
