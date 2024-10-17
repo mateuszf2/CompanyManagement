@@ -32,40 +32,6 @@
                     console.error('Backend nie zwrócił odpowiedzi w formacie JSON')
                 })
               })
-           },
-           rozszerz() {
-              fetch(daneEndpoint, {
-                method: 'PUT',
-                headers: { 'Content-type': 'application/json' },
-                body: JSON.stringify({ dane: this.dane })
-              }).then(res => {
-                res.json().then(data => {
-                    if(!data.set) {
-                        console.error('Backend nie przypisał wartości')
-                    } else {
-                        this.dane = data.dane
-                        console.log('Dane w backendzie ustawione na', data.dane)
-                    }
-                }).catch(err => {
-                    console.error('Backend nie zwrócił odpowiedzi w formacie JSON')
-                })
-              })
-           },
-           wyzeruj() {
-              fetch(daneEndpoint, {
-                method: 'DELETE'
-              }).then(res => {
-                res.json().then(data => {
-                    if(!data.set) {
-                        console.error('Backend nie wyzerował wartości')
-                    } else {
-                        this.dane = data.dane
-                        console.log('Dane w backendzie ustawione na', data.dane)
-                    }
-                }).catch(err => {
-                    console.error('Backend nie zwrócił odpowiedzi w formacie JSON')
-                })
-              })
            }  
          },
         mounted() {
@@ -96,8 +62,6 @@
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" variant="elevated" @click="ustaw()" :disabled="!isValid">Ustaw</v-btn>
-                <v-btn color="secondary" variant="elevated" @click="rozszerz()">Rozszerz</v-btn>
-                <v-btn color="error" variant="elevated" @click="wyzeruj()">Wyzeruj</v-btn>
             </v-card-actions>
         </v-card>
     </v-form>

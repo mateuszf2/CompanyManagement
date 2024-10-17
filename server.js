@@ -27,27 +27,23 @@ app.get(daneEndpoint, (req, res) => {
     res.json({ dane })
 })
 
+const startsWithLetter = value => {
+    const pattern = /^\p{L}/u
+    return pattern.test(value) || 'Wymagane zaczynanie się od litery'
+}
+
 app.post(daneEndpoint, (req, res) => {
     if(req.body && req.body.dane) {
-        dane = req.body.dane
-        res.json({ dane, set: true })
+        let validation = startsWithLetter(req.body.dane)
+        if(validation === true) {
+            dane = req.body.dane
+            res.json({ dane, set: true })
+        } else {
+            res.status(400).json({ validation, set: false })    
+        }
     } else {
-        res.status(400).json({ set: false })
+        res.status(400).json({ validation: 'Dane niepełne', set: false })
     }
-})
-
-app.put(daneEndpoint, (req, res) => {
-    if(req.body && req.body.dane) {
-        dane += req.body.dane
-        res.json({ dane, set: true })
-    } else {
-        res.status(400).json({ set: false })
-    }
-})
-
-app.delete(daneEndpoint, (req, res) => {
-    dane = ''
-    res.json({ dane, set: true })
 })
 
 app.listen(config.port, () => {
