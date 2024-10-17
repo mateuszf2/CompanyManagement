@@ -7,6 +7,9 @@
             return {
                 data: {},
                 isValid: false,
+                snackbar: false,
+                snackbar_text: '',
+                snackbar_color: '',
                 rules: {
                     startsWithLetter: value => {
                         const pattern = /^\p{L}/u
@@ -24,6 +27,11 @@
             }
         },
         methods: {
+           popup(text, color) {
+                this.snackbar_text = text
+                this.snackbar_color = color
+                this.snackbar = true
+           },
            send() {
               fetch(dataEndpoint, {
                 method: 'POST',
@@ -32,12 +40,12 @@
               }).then(res => {
                 res.json().then(data => {
                     if(!data.set) {
-                        console.error('Backend nie przypisał wartości')
+                        this.popup(data.validation, 'red')
                     } else {
-                        console.log('Dane w backendzie ustawione na', data.dane)
+                        this.popup('Dane dodane', 'green')
                     }
                 }).catch(err => {
-                    console.error('Backend nie zwrócił odpowiedzi w formacie JSON')
+                    this.popup('Dane odrzucone', 'red')
                 })
               })
            }  
@@ -48,10 +56,9 @@
             }).then(res => res.json().then(
                 obj => {
                     this.data = obj
-                    console.log('Pobrano dane z backendu', obj)
                 }
             )).catch(err => {
-                console.error('Backend nie zwrócił odpowiedzi w formacie JSON')
+                this.popup('Backend nie zwrócił odpowiedzi, czy w ogóle pracuje?', 'red')
             })
         }
     }
@@ -61,7 +68,10 @@
     <v-form v-model="isValid">
         <v-card variant="outlined">
             <v-card-title>Wprowadź opis roku</v-card-title>
-            <v-card-subtitle>Dane muszą spełniać odpowiednie reguły, zarówno w tym formularzu, jak i w backendzie</v-card-subtitle>
+            <v-card-subtitle>
+                Dane muszą spełniać odpowiednie reguły, zarówno w tym formularzu, jak i w backendzie.
+                Dodatkowo, nie możesz wysłać dwa razy opisu tego samego roku.
+            </v-card-subtitle>
             <v-card-text>
                 <v-text-field type="number" variant="outlined" label="Rok" v-model="data.year" :rules="[ rules.onlyDigits, rules.validYear ]">
                 </v-text-field>
@@ -74,6 +84,15 @@
             </v-card-actions>
         </v-card>
     </v-form>
+
+    <v-snackbar v-model="snackbar" variant="outlined" :color="snackbar_color" :timeout="5000">
+      {{ snackbar_text }}
+      <template v-slot:actions>
+        <v-btn :color="snackbar_color" variant="elevated" @click="snackbar = false">
+          Zamknij
+        </v-btn>
+      </template>
+    </v-snackbar>
 </template>
 
 <style scoped>

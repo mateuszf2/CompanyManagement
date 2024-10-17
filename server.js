@@ -17,10 +17,13 @@ app.use((err, req, res, next) => {
     res.status(400).json({ error: err.message })
 })
 
-
 app.use(express.static(config.frontend))
 
 const dataEndpoint = '/data'
+const historyEndpoint = '/history'
+
+const history = {}
+
 let data = {
     year: 2024,
     description: 'Aktualny rok'
@@ -28,6 +31,10 @@ let data = {
 
 app.get(dataEndpoint, (req, res) => {
     res.json(data)
+})
+
+app.get(historyEndpoint, (req, res) => {
+    res.json(history)
 })
 
 const validYear = value => {
@@ -45,8 +52,13 @@ app.post(dataEndpoint, (req, res) => {
         const validation = validYear(req.body.year) || startsWithLetter(req.body.description)
         if(validation == '') {
             data = req.body
-            data.year = parseInt(data.year)
-            res.json({ data, set: true })
+            data.year = '' + data.year
+            if(history[data.year]) {
+                res.status(400).json({ validation: 'Próba nadpisania danych', set: false })        
+            } else {
+                res.json({ data, set: true })
+                history[data.year] = data.description
+            }
         } else {
             res.status(400).json({ validation, set: false })    
         }

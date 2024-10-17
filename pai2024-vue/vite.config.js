@@ -15,7 +15,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/data': 'http://localhost:8000'
+      '^/(data|history)$': 'http://localhost:8000'
     },
   },
 })
