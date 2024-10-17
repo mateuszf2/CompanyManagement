@@ -20,29 +20,38 @@ app.use((err, req, res, next) => {
 
 app.use(express.static(config.frontend))
 
-const daneEndpoint = '/dane'
-let dane = ''
+const dataEndpoint = '/data'
+let data = {
+    year: 2024,
+    description: 'Aktualny rok'
+} 
 
-app.get(daneEndpoint, (req, res) => {
-    res.json({ dane })
+app.get(dataEndpoint, (req, res) => {
+    res.json(data)
 })
+
+const validYear = value => {
+    const rok = parseInt(value)
+    return (rok >= 1900 && rok <= 2024) ? '' : 'Wymagana wartość od 1900 do 2024'
+}
 
 const startsWithLetter = value => {
     const pattern = /^\p{L}/u
-    return pattern.test(value) || 'Wymagane zaczynanie się od litery'
+    return value && pattern.test(value) ? '' : 'Wymagane zaczynanie się od litery'
 }
 
-app.post(daneEndpoint, (req, res) => {
-    if(req.body && req.body.dane) {
-        let validation = startsWithLetter(req.body.dane)
-        if(validation === true) {
-            dane = req.body.dane
-            res.json({ dane, set: true })
+app.post(dataEndpoint, (req, res) => {
+    if(req.body) {
+        const validation = validYear(req.body.year) || startsWithLetter(req.body.description)
+        if(validation == '') {
+            data = req.body
+            data.year = parseInt(data.year)
+            res.json({ data, set: true })
         } else {
             res.status(400).json({ validation, set: false })    
         }
     } else {
-        res.status(400).json({ validation: 'Dane niepełne', set: false })
+        res.status(400).json({ validation: 'Brak danych', set: false })
     }
 })
 

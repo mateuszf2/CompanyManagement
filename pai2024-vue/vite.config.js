@@ -15,7 +15,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/dane': 'http://localhost:8000'
+      '/data': 'http://localhost:8000'
     },
   },
 })
