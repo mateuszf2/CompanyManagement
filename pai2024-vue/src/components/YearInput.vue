@@ -26,6 +26,7 @@
                 }
             }
         },
+        emits: [ 'historyChanged' ],
         methods: {
            popup(text, color) {
                 this.snackbar_text = text
@@ -43,6 +44,7 @@
                         this.popup(data.validation, 'red')
                     } else {
                         this.popup('Dane dodane', 'green')
+                        this.$emit('historyChanged')
                     }
                 }).catch(err => {
                     this.popup('Dane odrzucone', 'red')

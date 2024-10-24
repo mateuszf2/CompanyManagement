@@ -9,15 +9,18 @@
             }
         },
         methods: {
+            retrieve() {
+                fetch(historyEndpoint, {
+                    method: 'GET'
+                }).then(res => res.json().then(
+                    obj => {
+                        this.history = obj
+                    }
+                ))
+            }
         },
         mounted() {
-            fetch(historyEndpoint, {
-                method: 'GET'
-            }).then(res => res.json().then(
-                obj => {
-                    this.history = obj
-                }
-            ))
+            this.retrieve()
         }
     }
 </script>
