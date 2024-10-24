@@ -1,9 +1,11 @@
 <script setup>
-  import TestComponent from './components/TestComponent.vue'
+  import YearInput from './components/YearInput.vue'
+  import YearsHistory from './components/YearsHistory.vue'
 </script>
 
 <template>
-  <TestComponent/>
+  <YearsHistory/>
+  <YearInput/>
 </template>
 
 <style scoped>
