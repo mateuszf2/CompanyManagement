@@ -1,11 +1,14 @@
+const fs = require('fs')
+
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 
-const config = {
+let config = {
     port: 8000,
-    frontend: './pai2024-vue/dist'
+    frontend: './pai2024-vue/dist',
+    dbUrl: 'mongodb://localhost:27017/'
 }
 
 const app = express()
@@ -66,6 +69,13 @@ app.post(dataEndpoint, (req, res) => {
         res.status(400).json({ validation: 'Brak danych', set: false })
     }
 })
+
+try {
+    config = JSON.parse(fs.readFileSync('config.json'))
+    console.log('Konfiguracja z config.json')
+} catch(err) {
+    console.log('Konfiguracja domyślna')
+}
 
 app.listen(config.port, () => {
     console.log('Backend słucha na porcie', config.port)
