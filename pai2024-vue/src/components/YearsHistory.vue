@@ -34,8 +34,8 @@
                     <tr><th>Rok</th><th>Opis</th></tr>
                 </thead>
                 <tbody>
-                    <tr v-for="year in Object.keys(history)">
-                        <td>{{ year }}</td><td>{{ history[year] }}</td>
+                    <tr v-for="historyObj in history">
+                        <td>{{ historyObj.year }}</td><td>{{ historyObj.description }}</td>
                     </tr>
                 </tbody>
             </v-table>

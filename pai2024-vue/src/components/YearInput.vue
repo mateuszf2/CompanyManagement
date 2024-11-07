@@ -1,6 +1,6 @@
 <script>
 
-    const dataEndpoint = '/data'
+    const historyEndpoint = '/history'
 
     export default {
         data() {
@@ -34,14 +34,14 @@
                 this.snackbar = true
            },
            send() {
-              fetch(dataEndpoint, {
+              fetch(historyEndpoint, {
                 method: 'POST',
                 headers: { 'Content-type': 'application/json' },
                 body: JSON.stringify(this.data)
               }).then(res => {
                 res.json().then(data => {
-                    if(!data.set) {
-                        this.popup(data.validation, 'red')
+                    if(!res.ok) {
+                        this.popup(data.error)
                     } else {
                         this.popup('Dane dodane', 'green')
                         this.$emit('historyChanged')
@@ -51,17 +51,6 @@
                 })
               })
            }  
-         },
-        mounted() {
-            fetch(dataEndpoint, {
-                method: 'GET'
-            }).then(res => res.json().then(
-                obj => {
-                    this.data = obj
-                }
-            )).catch(err => {
-                this.popup('Backend nie zwrócił odpowiedzi, czy w ogóle pracuje?', 'red')
-            })
         }
     }
 </script>

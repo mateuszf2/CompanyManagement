@@ -4,11 +4,13 @@ const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
+const uuid = require('uuid')
+const mongoose = require('mongoose')
 
 let config = {
     port: 8000,
     frontend: './pai2024-vue/dist',
-    dbUrl: 'mongodb://localhost:27017/'
+    dbUrl: 'mongodb://localhost:27017/pai2024'
 }
 
 const app = express()
@@ -22,51 +24,44 @@ app.use((err, req, res, next) => {
 
 app.use(express.static(config.frontend))
 
-const dataEndpoint = '/data'
-const historyEndpoint = '/history'
-
-const history = {}
-
-let data = {
-    year: 2024,
-    description: 'Aktualny rok'
-} 
-
-app.get(dataEndpoint, (req, res) => {
-    res.json(data)
+const historySchema = new mongoose.Schema({
+    _id: { type: String, default: uuid.v4 },
+    year: { type: Number, required: true, min: 1900, max: 2024 },
+    description: { type: String }
+}, {
+    versionKey: false,
+    additionalProperties: false
 })
+
+const historyEndpoint = '/history'
+let History = null
 
 app.get(historyEndpoint, (req, res) => {
-    res.json(history)
+    // pobierz wszystkie rekordy z bazy do zmiennej history
+    History.find({})
+    .then(history => {
+        res.json(history)
+    })
+    .catch(err => {
+        res.status(400).json({ error: 'Nieudany odczyt z bazy' })
+    })    
 })
 
-const validYear = value => {
-    const rok = parseInt(value)
-    return (rok >= 1900 && rok <= 2024) ? '' : 'Wymagana wartość od 1900 do 2024'
-}
-
-const startsWithLetter = value => {
-    const pattern = /^\p{L}/u
-    return value && pattern.test(value) ? '' : 'Wymagane zaczynanie się od litery'
-}
-
-app.post(dataEndpoint, (req, res) => {
+app.post(historyEndpoint, (req, res) => {
     if(req.body) {
-        const validation = validYear(req.body.year) || startsWithLetter(req.body.description)
-        if(validation == '') {
-            data = req.body
-            data.year = '' + data.year
-            if(history[data.year]) {
-                res.status(400).json({ validation: 'Próba nadpisania danych', set: false })        
-            } else {
-                res.json({ data, set: true })
-                history[data.year] = data.description
-            }
-        } else {
-            res.status(400).json({ validation, set: false })    
+        // utwórz obiekt na podstawie req.body, zwaliduj go i zapisz do bazy
+        const history = new History(req.body)
+        if(history.validateSync()) {
+            res.status(400).json({ error: 'Rekord niezgodny ze schematem', set: false })
+            return
         }
+        history.save()
+        .then(historyAdded => {
+            res.json(historyAdded)
+        })
+        .catch(err => res.status(400).json({ error: 'Zapis nieudany', set: false }))
     } else {
-        res.status(400).json({ validation: 'Brak danych', set: false })
+        res.status(400).json({ error: 'Brak danych', set: false })
     }
 })
 
@@ -76,6 +71,16 @@ try {
 } catch(err) {
     console.log('Konfiguracja domyślna')
 }
+
+mongoose.connect(config.dbUrl)
+.then(conn => {
+    console.log('Połączenie z bazą danych nawiązane')
+    History = conn.model('History', historySchema)
+})
+.catch(err => {
+    console.error('Połączenie z bazą danych nieudane', err)
+    process.exit(0)
+})
 
 app.listen(config.port, () => {
     console.log('Backend słucha na porcie', config.port)
