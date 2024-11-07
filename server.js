@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const uuid = require('uuid')
 const mongoose = require('mongoose')
+const { EventEmitter } = require('stream')
 
 let config = {
     port: 8000,
@@ -26,8 +27,15 @@ app.use(express.static(config.frontend))
 
 const historySchema = new mongoose.Schema({
     _id: { type: String, default: uuid.v4 },
-    year: { type: Number, required: true, min: 1900, max: 2024 },
-    description: { type: String }
+    year: { type: Number, required: true, validate: {
+        validator: (value) => Number.isInteger(value) &&
+          value >= 1900 && value <= new Date().getFullYear(),
+        message: props => `${props.value} nie jest prawidłowym rokiem`
+    }},
+    description: { type: String, required: true, validate: {
+        validator: value => /^\p{L}/u.test(value),
+        message: props => `${props.value} nie pasuje do wymagań`
+    }}
 }, {
     versionKey: false,
     additionalProperties: false
@@ -51,8 +59,9 @@ app.post(historyEndpoint, (req, res) => {
     if(req.body) {
         // utwórz obiekt na podstawie req.body, zwaliduj go i zapisz do bazy
         const history = new History(req.body)
-        if(history.validateSync()) {
-            res.status(400).json({ error: 'Rekord niezgodny ze schematem', set: false })
+        const err = history.validateSync()
+        if(err) {
+            res.status(400).json({ error: err.message })
             return
         }
         history.save()

@@ -5,11 +5,8 @@
     export default {
         data() {
             return {
-                data: {},
+                input: {},
                 isValid: false,
-                snackbar: false,
-                snackbar_text: '',
-                snackbar_color: '',
                 rules: {
                     startsWithLetter: value => {
                         const pattern = /^\p{L}/u
@@ -20,34 +17,31 @@
                         return pattern.test(value) || 'Wyłącznie cyfry'
                     },
                     validYear: value => {
-                        const rok = parseInt(value)
-                        return (rok >= 1900 && rok <= 2024) || 'Wymagana wartość od 1900 do 2024'
+                        const year = parseInt(value)
+                        const currentYear = new Date().getFullYear()
+                        return (year >= 1900 && year <= currentYear) || `Wymagana wartość od 1900 do ${currentYear}`
                     }
                 }
             }
         },
-        emits: [ 'historyChanged' ],
+        emits: [ 'popup', 'historyChanged' ],
         methods: {
-           popup(text, color) {
-                this.snackbar_text = text
-                this.snackbar_color = color
-                this.snackbar = true
-           },
            send() {
               fetch(historyEndpoint, {
                 method: 'POST',
                 headers: { 'Content-type': 'application/json' },
-                body: JSON.stringify(this.data)
+                body: JSON.stringify(this.input)
               }).then(res => {
                 res.json().then(data => {
                     if(!res.ok) {
-                        this.popup(data.error)
+                        this.$emit('popup', data.error, 'red')
                     } else {
-                        this.popup('Dane dodane', 'green')
+                        this.input = {}
+                        this.$emit('popup', 'Dane dodane', 'green')
                         this.$emit('historyChanged')
                     }
                 }).catch(err => {
-                    this.popup('Dane odrzucone', 'red')
+                    this.$emit('popup', 'Dane odrzucone', 'red')
                 })
               })
            }  
@@ -64,9 +58,9 @@
                 Dodatkowo, nie możesz wysłać dwa razy opisu tego samego roku.
             </v-card-subtitle>
             <v-card-text>
-                <v-text-field type="number" variant="outlined" label="Rok" v-model="data.year" :rules="[ rules.onlyDigits, rules.validYear ]">
+                <v-text-field type="number" variant="outlined" label="Rok" v-model="input.year" :rules="[ rules.onlyDigits, rules.validYear ]">
                 </v-text-field>
-                <v-text-field variant="outlined" label="Opis" v-model="data.description" :rules="[ rules.startsWithLetter ]">
+                <v-text-field variant="outlined" label="Opis" v-model="input.description" :rules="[ rules.startsWithLetter ]">
                 </v-text-field>
             </v-card-text>
             <v-card-actions>
@@ -76,14 +70,6 @@
         </v-card>
     </v-form>
 
-    <v-snackbar v-model="snackbar" variant="outlined" :color="snackbar_color" :timeout="5000">
-      {{ snackbar_text }}
-      <template v-slot:actions>
-        <v-btn :color="snackbar_color" variant="elevated" @click="snackbar = false">
-          Zamknij
-        </v-btn>
-      </template>
-    </v-snackbar>
 </template>
 
 <style scoped>
