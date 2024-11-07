@@ -8,6 +8,7 @@
                 history: {}
             }
         },
+        emits: [ 'dataClicked' ],
         methods: {
             retrieve() {
                 fetch(historyEndpoint, {
@@ -17,6 +18,9 @@
                         this.history = obj
                     }
                 ))
+            },
+            click(data) {
+                this.$emit('dataClicked', data)
             }
         },
         mounted() {
@@ -34,7 +38,7 @@
                     <tr><th>Rok</th><th>Opis</th></tr>
                 </thead>
                 <tbody>
-                    <tr v-for="historyObj in history">
+                    <tr v-for="historyObj in history" @click="click(historyObj)">
                         <td>{{ historyObj.year }}</td><td>{{ historyObj.description }}</td>
                     </tr>
                 </tbody>

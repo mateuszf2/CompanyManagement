@@ -17,14 +17,17 @@
       },
       onHistoryChanged() {
         this.$refs.yearsHistory.retrieve()
+      },
+      onDataClicked(data) {
+        this.$refs.yearInput.setData(data)
       }
     }
   }
 </script>
 
 <template>
-  <YearsHistory ref="yearsHistory"/>
-  <YearInput @popup="onPopup" @history-changed="onHistoryChanged"/>
+  <YearsHistory ref="yearsHistory" @data-clicked="onDataClicked"/>
+  <YearInput ref="yearInput" @popup="onPopup" @history-changed="onHistoryChanged"/>
 
   <v-snackbar v-model="snackbar.on" :color="snackbar.color" :timeout="5000">
       {{ snackbar.text }}

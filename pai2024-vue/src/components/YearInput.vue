@@ -44,6 +44,13 @@
                     this.$emit('popup', 'Dane odrzucone', 'red')
                 })
               })
+           },
+           setData(data) {
+              this.input = data
+           },
+           clear() {
+            this.input = {}
+            this.isValid = false
            }  
         }
     }
@@ -65,7 +72,9 @@
             </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" variant="elevated" @click="send()" :disabled="!isValid">Wyślij</v-btn>
+                <v-btn variant="elevated" @click="clear">Zeruj</v-btn>
+                <v-btn color="primary" variant="elevated" @click="send" :disabled="!isValid" v-if="!input._id">Wyślij</v-btn>
+                <v-btn color="secondary" variant="elevated" @click="" :disabled="!isValid" v-if="input._id">Aktualizuj</v-btn>
             </v-card-actions>
         </v-card>
     </v-form>
