@@ -41,7 +41,7 @@ const historySchema = new mongoose.Schema({
     additionalProperties: false
 })
 
-const historyEndpoint = '/history'
+const historyEndpoint = '/api/history'
 let History = null
 
 app.get(historyEndpoint, (req, res) => {
@@ -68,9 +68,36 @@ app.post(historyEndpoint, (req, res) => {
         .then(historyAdded => {
             res.json(historyAdded)
         })
-        .catch(err => res.status(400).json({ error: 'Zapis nieudany', set: false }))
+        .catch(err => res.status(400).json({ error: err.message, set: false }))
     } else {
         res.status(400).json({ error: 'Brak danych', set: false })
+    }
+})
+
+app.put(historyEndpoint, (req, res) => {
+    if(req.body && req.body._id) {
+        const _id = req.body._id
+        delete req.body._id
+        History.findOneAndUpdate({ _id }, { $set: req.body }, { new: true, runValidators: true })
+        .then(historyUpdated => {
+            res.json(historyUpdated)
+        })
+        .catch(err => res.status(400).json({ error: err.message }))
+    } else {
+        res.status(400).json({ error: 'Brak danych do aktualizacji' })
+    }
+})
+
+app.delete(historyEndpoint, (req, res) => {
+    if(req.query._id) {
+        const _id = req.query._id
+        History.findOneAndDelete({ _id })
+        .then(historyDeleted => {
+            res.json(historyDeleted)
+        })
+        .catch(err => res.status(400).json({ error: err.message }))
+    } else {
+        res.status(400).json({ error: 'Brak danych do usunięcia' })
     }
 })
 

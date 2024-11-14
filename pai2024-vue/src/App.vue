@@ -10,7 +10,7 @@
       }
     },
     methods: {
-      onPopup(text, color) {
+      onPopup(text, color = 'success') {
         this.snackbar.text = text
         this.snackbar.color = color
         this.snackbar.on = true

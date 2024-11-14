@@ -1,6 +1,6 @@
 <script>
 
-    const historyEndpoint = '/history'
+    const historyEndpoint = '/api/history'
 
     export default {
         data() {

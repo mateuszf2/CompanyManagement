@@ -1,6 +1,6 @@
 <script>
 
-    const historyEndpoint = '/history'
+    const historyEndpoint = '/api/history'
 
     export default {
         data() {
@@ -34,19 +34,56 @@
               }).then(res => {
                 res.json().then(data => {
                     if(!res.ok) {
-                        this.$emit('popup', data.error, 'red')
+                        this.$emit('popup', data.error, 'error')
                     } else {
                         this.input = {}
-                        this.$emit('popup', 'Dane dodane', 'green')
+                        this.$emit('popup', 'Rekord dodany')
                         this.$emit('historyChanged')
                     }
                 }).catch(err => {
-                    this.$emit('popup', 'Dane odrzucone', 'red')
+                    this.$emit('popup', 'Dane odrzucone', 'error')
+                })
+              })
+           },
+           update() {
+              fetch(historyEndpoint, {
+                method: 'PUT',
+                headers: { 'Content-type': 'application/json' },
+                body: JSON.stringify(this.input)
+              }).then(res => {
+                res.json().then(data => {
+                    if(!res.ok) {
+                        this.$emit('popup', data.error, 'error')
+                    } else {
+                        this.input = {}
+                        this.$emit('popup', 'Rekord zaktualizowany')
+                        this.$emit('historyChanged')
+                    }
+                }).catch(err => {
+                    this.$emit('popup', 'Dane odrzucone', 'error')
+                })
+              })
+           },
+           remove() {
+              fetch(historyEndpoint + '?' + new URLSearchParams({ _id: this.input._id }), {
+                method: 'DELETE'
+              }).then(res => {
+                res.json().then(data => {
+                    if(!res.ok) {
+                        this.$emit('popup', data.error, 'error')
+                    } else {
+                        this.input = {}
+                        this.$emit('popup', 'Rekord usunięty')
+                        this.$emit('historyChanged')
+                    }
+                }).catch(err => {
+                    this.$emit('popup', 'Dane odrzucone', 'error')
                 })
               })
            },
            setData(data) {
-              this.input = data
+              this.input = {}
+              Object.assign(this.input, data)
            },
            clear() {
             this.input = {}
@@ -74,7 +111,8 @@
                 <v-spacer></v-spacer>
                 <v-btn variant="elevated" @click="clear">Zeruj</v-btn>
                 <v-btn color="primary" variant="elevated" @click="send" :disabled="!isValid" v-if="!input._id">Wyślij</v-btn>
-                <v-btn color="secondary" variant="elevated" @click="" :disabled="!isValid" v-if="input._id">Aktualizuj</v-btn>
+                <v-btn color="secondary" variant="elevated" @click="update" :disabled="!isValid" v-if="input._id">Aktualizuj</v-btn>
+                <v-btn color="error" variant="elevated" @click="remove" v-if="input._id">Usuń</v-btn>
             </v-card-actions>
         </v-card>
     </v-form>
