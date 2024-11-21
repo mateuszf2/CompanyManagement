@@ -1,14 +1,17 @@
 <script>
+    import PersonEditor from './PersonEditor.vue'
 
     const personEndpoint = '/api/person'
 
     export default {
+        components: { PersonEditor },
         data() {
             return {
-                persons: {}
+                persons: {},
+                id: null,
+                editor: false
             }
         },
-        emits: [ 'dataClicked' ],
         methods: {
             retrieve() {
                 fetch(personEndpoint, {
@@ -20,7 +23,8 @@
                 ))
             },
             click(data) {
-                this.$emit('dataClicked', data)
+                this.id = data._id || null
+                this.editor = true
             }
         },
         mounted() {
@@ -45,6 +49,10 @@
             </v-table>
         </v-card-text>
     </v-card>
+
+    <v-dialog v-model="editor" width="50%">
+        <PersonEditor :id="id"/>
+    </v-dialog>
 </template>
 
 <style scoped>

@@ -5,8 +5,8 @@
     export default {
         data() {
             return {
-                input: {},
                 isValid: false,
+                input: {},
                 rules: {
                     startsWithLetter: value => {
                         const pattern = /^\p{L}/u
@@ -19,6 +19,7 @@
                 }
             }
         },
+        props: [ 'id' ],
         emits: [ 'popup', 'listChanged' ],
         methods: {
            send() {
@@ -81,6 +82,7 @@
               Object.assign(this.input, data)
            },
            clear() {
+            console.log(this.id)
             this.input = {}
             this.isValid = false
            }  
@@ -90,7 +92,7 @@
 
 <template>
     <v-form v-model="isValid">
-        <v-card variant="outlined">
+        <v-card>
             <v-card-title>Wprowadź dane osoby</v-card-title>
             <v-card-subtitle>
                 Dane muszą spełniać odpowiednie reguły, zarówno w tym formularzu, jak i w backendzie.
