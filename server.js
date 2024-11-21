@@ -6,7 +6,6 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const uuid = require('uuid')
 const mongoose = require('mongoose')
-const { EventEmitter } = require('stream')
 
 let config = {
     port: 8000,
@@ -25,48 +24,52 @@ app.use((err, req, res, next) => {
 
 app.use(express.static(config.frontend))
 
-const historySchema = new mongoose.Schema({
+const personSchema = new mongoose.Schema({
     _id: { type: String, default: uuid.v4 },
-    year: { type: Number, required: true, validate: {
-        validator: (value) => Number.isInteger(value) &&
-          value >= 1900 && value <= new Date().getFullYear(),
-        message: props => `${props.value} nie jest prawidłowym rokiem`
-    }},
-    description: { type: String, required: true, validate: {
+    firstName: { type: String, required: true, validate: {
         validator: value => /^\p{L}/u.test(value),
         message: props => `${props.value} nie pasuje do wymagań`
-    }}
+    }},
+    lastName: { type: String, required: true, validate: {
+        validator: value => /^\p{L}/u.test(value),
+        message: props => `${props.value} nie pasuje do wymagań`
+    }},
+    birthDate: { type: Date, required: true, validate: {
+        validator: value => value <= new Date(),
+        message: props => `${props.value} nie jest prawidłową datą urodzenia`
+        }, transform: value => value.toISOString().substr(0, 10)
+    }
 }, {
     versionKey: false,
     additionalProperties: false
 })
 
-const historyEndpoint = '/api/history'
-let History = null
+const personEndpoint = '/api/person'
+let Person = null
 
-app.get(historyEndpoint, (req, res) => {
-    // pobierz wszystkie rekordy z bazy do zmiennej history
-    History.find({})
-    .then(history => {
-        res.json(history)
+app.get(personEndpoint, (req, res) => {
+    // pobierz wszystkie rekordy z bazy do zmiennej person
+    Person.find({})
+    .then(person => {
+        res.json(person)
     })
     .catch(err => {
         res.status(400).json({ error: 'Nieudany odczyt z bazy' })
     })    
 })
 
-app.post(historyEndpoint, (req, res) => {
+app.post(personEndpoint, (req, res) => {
     if(req.body) {
         // utwórz obiekt na podstawie req.body, zwaliduj go i zapisz do bazy
-        const history = new History(req.body)
-        const err = history.validateSync()
+        const person = new Person(req.body)
+        const err = person.validateSync()
         if(err) {
             res.status(400).json({ error: err.message })
             return
         }
-        history.save()
-        .then(historyAdded => {
-            res.json(historyAdded)
+        person.save()
+        .then(personAdded => {
+            res.json(personAdded)
         })
         .catch(err => res.status(400).json({ error: err.message, set: false }))
     } else {
@@ -74,13 +77,13 @@ app.post(historyEndpoint, (req, res) => {
     }
 })
 
-app.put(historyEndpoint, (req, res) => {
+app.put(personEndpoint, (req, res) => {
     if(req.body && req.body._id) {
         const _id = req.body._id
         delete req.body._id
-        History.findOneAndUpdate({ _id }, { $set: req.body }, { new: true, runValidators: true })
-        .then(historyUpdated => {
-            res.json(historyUpdated)
+        Person.findOneAndUpdate({ _id }, { $set: req.body }, { new: true, runValidators: true })
+        .then(personUpdated => {
+            res.json(personUpdated)
         })
         .catch(err => res.status(400).json({ error: err.message }))
     } else {
@@ -88,12 +91,12 @@ app.put(historyEndpoint, (req, res) => {
     }
 })
 
-app.delete(historyEndpoint, (req, res) => {
+app.delete(personEndpoint, (req, res) => {
     if(req.query._id) {
         const _id = req.query._id
-        History.findOneAndDelete({ _id })
-        .then(historyDeleted => {
-            res.json(historyDeleted)
+        Person.findOneAndDelete({ _id })
+        .then(personDeleted => {
+            res.json(personDeleted)
         })
         .catch(err => res.status(400).json({ error: err.message }))
     } else {
@@ -111,7 +114,7 @@ try {
 mongoose.connect(config.dbUrl)
 .then(conn => {
     console.log('Połączenie z bazą danych nawiązane')
-    History = conn.model('History', historySchema)
+    Person = conn.model('person', personSchema)
 })
 .catch(err => {
     console.error('Połączenie z bazą danych nieudane', err)
