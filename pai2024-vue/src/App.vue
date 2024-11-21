@@ -19,7 +19,7 @@
 </script>
 
 <template>
-  <PersonList ref="personList"/>
+  <PersonList ref="personList" @popup="onPopup"/>
 
   <v-snackbar v-model="snackbar.on" :color="snackbar.color" :timeout="5000">
       {{ snackbar.text }}

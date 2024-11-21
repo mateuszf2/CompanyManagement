@@ -5,10 +5,11 @@
 
     export default {
         components: { PersonEditor },
+        emits: [ 'popup' ],
         data() {
             return {
                 persons: {},
-                id: null,
+                person: {},
                 editor: false
             }
         },
@@ -23,8 +24,18 @@
                 ))
             },
             click(data) {
-                this.id = data._id || null
+                this.person = data
                 this.editor = true
+            },
+            add() {
+                this.person = {}
+                this.editor = true
+            },
+            editorClose(text, color) {
+                this.editor = false
+                if(text) {
+                    this.$emit('popup', text, color)
+                }
             }
         },
         mounted() {
@@ -35,7 +46,10 @@
 
 <template>
     <v-card variant="outlined">
-        <v-card-title>Osoby</v-card-title>
+        <v-card-title>
+            Osoby
+            <v-btn @click="add">Dodaj</v-btn>
+        </v-card-title>
         <v-card-text>
             <v-table density="compact">
                 <thead>
@@ -51,7 +65,7 @@
     </v-card>
 
     <v-dialog v-model="editor" width="50%">
-        <PersonEditor :id="id"/>
+        <PersonEditor :person="person" @close="editorClose" @list-changed="retrieve"/>
     </v-dialog>
 </template>
 

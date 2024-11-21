@@ -19,8 +19,8 @@
                 }
             }
         },
-        props: [ 'id' ],
-        emits: [ 'popup', 'listChanged' ],
+        props: [ 'person' ],
+        emits: [ 'close', 'listChanged' ],
         methods: {
            send() {
               fetch(personEndpoint, {
@@ -30,14 +30,14 @@
               }).then(res => {
                 res.json().then(data => {
                     if(!res.ok) {
-                        this.$emit('popup', data.error, 'error')
+                        this.$emit('close', data.error, 'error')
                     } else {
                         this.input = {}
-                        this.$emit('popup', `${data.firstName} ${data.lastName} - dodano`)
+                        this.$emit('close', `${data.firstName} ${data.lastName} - dodano`)
                         this.$emit('listChanged')
                     }
                 }).catch(err => {
-                    this.$emit('popup', 'Dane odrzucone', 'error')
+                    this.$emit('close', 'Dane odrzucone', 'error')
                 })
               })
            },
@@ -49,14 +49,14 @@
               }).then(res => {
                 res.json().then(data => {
                     if(!res.ok) {
-                        this.$emit('popup', data.error, 'error')
+                        this.$emit('close', data.error, 'error')
                     } else {
                         this.input = {}
-                        this.$emit('popup', `${data.firstName} ${data.lastName} - zaktualizowano`)
+                        this.$emit('close', `${data.firstName} ${data.lastName} - zaktualizowano`)
                         this.$emit('listChanged')
                     }
                 }).catch(err => {
-                    this.$emit('popup', 'Dane odrzucone', 'error')
+                    this.$emit('close', 'Dane odrzucone', 'error')
                 })
               })
            },
@@ -66,14 +66,14 @@
               }).then(res => {
                 res.json().then(data => {
                     if(!res.ok) {
-                        this.$emit('popup', data.error, 'error')
+                        this.$emit('close', data.error, 'error')
                     } else {
                         this.input = {}
-                        this.$emit('popup', `${data.firstName} ${data.lastName} - usunięto`)
+                        this.$emit('close', `${data.firstName} ${data.lastName} - usunięto`)
                         this.$emit('listChanged')
                     }
                 }).catch(err => {
-                    this.$emit('popup', 'Dane odrzucone', 'error')
+                    this.$emit('close', 'Dane odrzucone', 'error')
                 })
               })
            },
@@ -82,10 +82,15 @@
               Object.assign(this.input, data)
            },
            clear() {
-            console.log(this.id)
-            this.input = {}
-            this.isValid = false
+                this.input = { _id: this.input._id }
+                this.isValid = false
+           },
+           close() {
+                this.$emit('close')
            }  
+        },
+        mounted() {
+            Object.assign(this.input, this.person)
         }
     }
 </script>
@@ -93,7 +98,7 @@
 <template>
     <v-form v-model="isValid">
         <v-card>
-            <v-card-title>Wprowadź dane osoby</v-card-title>
+            <v-card-title>{{ input._id ? 'Edytuj dane' : 'Wprowadź dane nowej osoby' }}</v-card-title>
             <v-card-subtitle>
                 Dane muszą spełniać odpowiednie reguły, zarówno w tym formularzu, jak i w backendzie.
             </v-card-subtitle>
@@ -111,6 +116,7 @@
                 <v-btn color="primary" variant="elevated" @click="send" :disabled="!isValid" v-if="!input._id">Wyślij</v-btn>
                 <v-btn color="secondary" variant="elevated" @click="update" :disabled="!isValid" v-if="input._id">Aktualizuj</v-btn>
                 <v-btn color="error" variant="elevated" @click="remove" v-if="input._id">Usuń</v-btn>
+                <v-btn variant="elevated" @click="close">Zamknij</v-btn>
             </v-card-actions>
         </v-card>
     </v-form>
