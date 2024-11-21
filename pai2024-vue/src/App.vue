@@ -1,9 +1,9 @@
 <script>
-  import YearInput from './components/YearInput.vue'
-  import YearsHistory from './components/YearsHistory.vue'
+  import PersonEditor from './components/PersonEditor.vue'
+  import PersonList from './components/PersonList.vue'
 
   export default {
-    components: { YearInput, YearsHistory },
+    components: { PersonEditor, PersonList },
     data() {
       return {
         snackbar: { on: false }
@@ -15,19 +15,19 @@
         this.snackbar.color = color
         this.snackbar.on = true
       },
-      onHistoryChanged() {
-        this.$refs.yearsHistory.retrieve()
+      onListChanged() {
+        this.$refs.personList.retrieve()
       },
       onDataClicked(data) {
-        this.$refs.yearInput.setData(data)
+        this.$refs.personEditor.setData(data)
       }
     }
   }
 </script>
 
 <template>
-  <YearsHistory ref="yearsHistory" @data-clicked="onDataClicked"/>
-  <YearInput ref="yearInput" @popup="onPopup" @history-changed="onHistoryChanged"/>
+  <PersonList ref="personList" @data-clicked="onDataClicked"/>
+  <PersonEditor ref="personEditor" @popup="onPopup" @list-changed="onListChanged"/>
 
   <v-snackbar v-model="snackbar.on" :color="snackbar.color" :timeout="5000">
       {{ snackbar.text }}

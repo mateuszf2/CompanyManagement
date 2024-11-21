@@ -1,6 +1,6 @@
 <script>
 
-    const historyEndpoint = '/api/history'
+    const personEndpoint = '/api/person'
 
     export default {
         data() {
@@ -12,22 +12,17 @@
                         const pattern = /^\p{L}/u
                         return pattern.test(value) || 'Wymagane zaczynanie się od litery'
                     },
-                    onlyDigits: value => {
-                        const pattern = /^\d+$/
-                        return pattern.test(value) || 'Wyłącznie cyfry'
-                    },
-                    validYear: value => {
-                        const year = parseInt(value)
-                        const currentYear = new Date().getFullYear()
-                        return (year >= 1900 && year <= currentYear) || `Wymagana wartość od 1900 do ${currentYear}`
+                    validDate: value => {
+                        const date = new Date(value)
+                        return date <= new Date() || `Wymagana data z przeszłości`
                     }
                 }
             }
         },
-        emits: [ 'popup', 'historyChanged' ],
+        emits: [ 'popup', 'listChanged' ],
         methods: {
            send() {
-              fetch(historyEndpoint, {
+              fetch(personEndpoint, {
                 method: 'POST',
                 headers: { 'Content-type': 'application/json' },
                 body: JSON.stringify(this.input)
@@ -37,8 +32,8 @@
                         this.$emit('popup', data.error, 'error')
                     } else {
                         this.input = {}
-                        this.$emit('popup', 'Rekord dodany')
-                        this.$emit('historyChanged')
+                        this.$emit('popup', `${data.firstName} ${data.lastName} - dodano`)
+                        this.$emit('listChanged')
                     }
                 }).catch(err => {
                     this.$emit('popup', 'Dane odrzucone', 'error')
@@ -46,7 +41,7 @@
               })
            },
            update() {
-              fetch(historyEndpoint, {
+              fetch(personEndpoint, {
                 method: 'PUT',
                 headers: { 'Content-type': 'application/json' },
                 body: JSON.stringify(this.input)
@@ -56,8 +51,8 @@
                         this.$emit('popup', data.error, 'error')
                     } else {
                         this.input = {}
-                        this.$emit('popup', 'Rekord zaktualizowany')
-                        this.$emit('historyChanged')
+                        this.$emit('popup', `${data.firstName} ${data.lastName} - zaktualizowano`)
+                        this.$emit('listChanged')
                     }
                 }).catch(err => {
                     this.$emit('popup', 'Dane odrzucone', 'error')
@@ -65,7 +60,7 @@
               })
            },
            remove() {
-              fetch(historyEndpoint + '?' + new URLSearchParams({ _id: this.input._id }), {
+              fetch(personEndpoint + '?' + new URLSearchParams({ _id: this.input._id }), {
                 method: 'DELETE'
               }).then(res => {
                 res.json().then(data => {
@@ -73,8 +68,8 @@
                         this.$emit('popup', data.error, 'error')
                     } else {
                         this.input = {}
-                        this.$emit('popup', 'Rekord usunięty')
-                        this.$emit('historyChanged')
+                        this.$emit('popup', `${data.firstName} ${data.lastName} - usunięto`)
+                        this.$emit('listChanged')
                     }
                 }).catch(err => {
                     this.$emit('popup', 'Dane odrzucone', 'error')
@@ -96,15 +91,16 @@
 <template>
     <v-form v-model="isValid">
         <v-card variant="outlined">
-            <v-card-title>Wprowadź opis roku</v-card-title>
+            <v-card-title>Wprowadź dane osoby</v-card-title>
             <v-card-subtitle>
                 Dane muszą spełniać odpowiednie reguły, zarówno w tym formularzu, jak i w backendzie.
-                Dodatkowo, nie możesz wysłać dwa razy opisu tego samego roku.
             </v-card-subtitle>
             <v-card-text>
-                <v-text-field type="number" variant="outlined" label="Rok" v-model="input.year" :rules="[ rules.onlyDigits, rules.validYear ]">
+                <v-text-field variant="outlined" label="Imię" v-model="input.firstName" :rules="[ rules.startsWithLetter ]">
                 </v-text-field>
-                <v-text-field variant="outlined" label="Opis" v-model="input.description" :rules="[ rules.startsWithLetter ]">
+                <v-text-field variant="outlined" label="Nazwisko" v-model="input.lastName" :rules="[ rules.startsWithLetter ]">
+                </v-text-field>
+                <v-text-field type="date" variant="outlined" label="Data urodzenia" v-model="input.birthDate" :rules="[ rules.validDate ]">
                 </v-text-field>
             </v-card-text>
             <v-card-actions>
