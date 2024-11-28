@@ -49,7 +49,19 @@ let Person = null
 
 app.get(personEndpoint, (req, res) => {
     // pobierz wszystkie rekordy z bazy do zmiennej person
-    Person.find({})
+    let sort = {}
+    if(req.query.sort) {
+        sort[req.query.sort] = +req.query.order || 1
+    }
+    let aggregation = []
+    aggregation.push({ $match: { firstName: { $regex: req.query.firstName || '' }}})
+    aggregation.push({ $match: { lastName: { $regex: req.query.lastName || '' }}})
+    if(req.query.sort) {
+        aggregation.push({ $sort: sort })
+    }
+    aggregation.push({ $skip: +req.query.skip || 0 })
+    aggregation.push({ $limit: +req.query.limit || 1000000 })
+    Person.aggregate(aggregation)
     .then(person => {
         res.json(person)
     })
