@@ -53,7 +53,15 @@ app.get(personEndpoint, (req, res) => {
     if(req.query.sort) {
         sort[req.query.sort] = +req.query.order || 1
     }
-    let aggregation = []
+    let aggregation = [{
+        $match: {
+            $or: [
+                { firstName: { $regex: req.query.search || '' }},
+                { lastName: { $regex: req.query.search || '' }}
+            ]
+        }
+    }]
+
     aggregation.push({ $match: { firstName: { $regex: req.query.firstName || '' }}})
     aggregation.push({ $match: { lastName: { $regex: req.query.lastName || '' }}})
     if(req.query.sort) {

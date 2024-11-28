@@ -10,21 +10,47 @@
             return {
                 persons: {},
                 person: {},
-                editor: false
+                editor: false,
+                itemsPerPage: 5,
+                headers: [
+                        { title: 'Imię', key: 'firstName', align: 'start', sortable: true },
+                        { title: 'Nazwisko', key: 'lastName', align: 'start' },
+                        { title: 'Data urodzenia', key: 'birthDate', align: 'end' }
+                    ],
+                loading: false,
+                search: '',
+                serverItems: []
             }
         },
         methods: {
+            loadItems({ page, itemsPerPage, sortBy }) {
+                this.loading = true
+                const skip = (page - 1) * itemsPerPage
+                let queryString = { skip, limit: itemsPerPage, search: this.search }
+                if(sortBy && sortBy[0]) {
+                    queryString.sort = sortBy[0].key
+                    queryString.order = sortBy[0].order
+                }            
+                fetch(personEndpoint + '?' + 
+                new URLSearchParams(queryString).toString())
+                .then(res => res.json().then(body => {
+                    this.serverItems = body
+                    this.loading = false
+                }))
+            },
             retrieve() {
                 fetch(personEndpoint, {
                     method: 'GET'
                 }).then(res => res.json().then(
                     obj => {
                         this.persons = obj
+                        this.persons = []
                     }
                 ))
             },
-            click(data) {
-                this.person = data
+            clickItem(item, event) {
+                this.person = event.item
+                this.person.birthDate = event.item.birthDate.substr(0, 10)
                 this.editor = true
             },
             add() {
@@ -39,7 +65,6 @@
             }
         },
         mounted() {
-            this.retrieve()
         }
     }
 </script>
@@ -51,7 +76,7 @@
             <v-btn @click="add">Dodaj</v-btn>
         </v-card-title>
         <v-card-text>
-            <v-table density="compact">
+            <!--v-table density="compact">
                 <thead>
                     <tr><th>Imię</th><th>Nazwisko</th><th>Data urodzenia</th></tr>
                 </thead>
@@ -60,7 +85,19 @@
                         <td>{{ personObj.firstName }}</td><td>{{ personObj.lastName }}</td><td>{{ new Date(personObj.birthDate).toLocaleDateString() }}</td>
                     </tr>
                 </tbody>
-            </v-table>
+            </v-table-->
+            <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="serverItems"
+                :items-length="1000" :loading="loading" :search="search"
+                @update:options="loadItems" @click:row="clickItem">
+                <template v-slot:tfoot>
+                    <tr>
+                        <td colspan="2">
+                            <v-text-field v-model="search" class="ma-2" variant="outlined" density="compact" placeholder="search..."
+                                hide-details></v-text-field>
+                        </td>
+                    </tr>
+                </template>
+            </v-data-table-server>
         </v-card-text>
     </v-card>
 
