@@ -53,14 +53,16 @@ app.get(personEndpoint, (req, res) => {
     if(req.query.sort) {
         sort[req.query.sort] = +req.query.order || 1
     }
-    let aggregation = [{
+    const matching = {
         $match: {
             $or: [
                 { firstName: { $regex: req.query.search || '' }},
                 { lastName: { $regex: req.query.search || '' }}
             ]
         }
-    }]
+    }
+
+    const aggregation = [ matching ]
 
     aggregation.push({ $match: { firstName: { $regex: req.query.firstName || '' }}})
     aggregation.push({ $match: { lastName: { $regex: req.query.lastName || '' }}})
@@ -69,9 +71,15 @@ app.get(personEndpoint, (req, res) => {
     }
     aggregation.push({ $skip: +req.query.skip || 0 })
     aggregation.push({ $limit: +req.query.limit || 1000000 })
-    Person.aggregate(aggregation)
-    .then(person => {
-        res.json(person)
+    Person.aggregate([{ $facet: {
+        total: [ matching, { $count: 'count' } ],
+        data: aggregation
+    }}])
+    .then(facet => {
+        [ facet ] = facet
+        facet.total = ( facet.total && facet.total[0] ? facet.total[0].count : 0) || 0
+        facet.data = facet.data.map(person => new Person(person))
+        res.json(facet)
     })
     .catch(err => {
         res.status(400).json({ error: 'Nieudany odczyt z bazy' })

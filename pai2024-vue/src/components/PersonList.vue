@@ -11,7 +11,7 @@
                 persons: {},
                 person: {},
                 editor: false,
-                itemsPerPage: 5,
+                itemsPerPage: 10,
                 headers: [
                         { title: 'Imię', key: 'firstName', align: 'start', sortable: true },
                         { title: 'Nazwisko', key: 'lastName', align: 'start' },
@@ -19,7 +19,9 @@
                     ],
                 loading: false,
                 search: '',
-                serverItems: []
+                itemsLength: 0,
+                serverItems: [],
+                tableKey: 0
             }
         },
         methods: {
@@ -32,25 +34,15 @@
                     queryString.order = sortBy[0].order
                 }            
                 fetch(personEndpoint + '?' + 
-                new URLSearchParams(queryString).toString())
-                .then(res => res.json().then(body => {
-                    this.serverItems = body
+                    new URLSearchParams(queryString).toString())
+                .then(res => res.json().then(facet => {
+                    this.itemsLength = +facet.total
+                    this.serverItems = facet.data
                     this.loading = false
                 }))
             },
-            retrieve() {
-                fetch(personEndpoint, {
-                    method: 'GET'
-                }).then(res => res.json().then(
-                    obj => {
-                        this.persons = obj
-                        this.persons = []
-                    }
-                ))
-            },
             clickItem(item, event) {
                 this.person = event.item
-                this.person.birthDate = event.item.birthDate.substr(0, 10)
                 this.editor = true
             },
             add() {
@@ -63,46 +55,35 @@
                     this.$emit('popup', text, color)
                 }
             }
-        },
-        mounted() {
         }
     }
 </script>
 
 <template>
     <v-card variant="outlined">
-        <v-card-title>
+        <v-card-title class="d-flex">
             Osoby
+            <v-spacer></v-spacer>
             <v-btn @click="add">Dodaj</v-btn>
         </v-card-title>
         <v-card-text>
-            <!--v-table density="compact">
-                <thead>
-                    <tr><th>Imię</th><th>Nazwisko</th><th>Data urodzenia</th></tr>
-                </thead>
-                <tbody>
-                    <tr v-for="personObj in persons" @click="click(personObj)">
-                        <td>{{ personObj.firstName }}</td><td>{{ personObj.lastName }}</td><td>{{ new Date(personObj.birthDate).toLocaleDateString() }}</td>
-                    </tr>
-                </tbody>
-            </v-table-->
             <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="serverItems"
-                :items-length="1000" :loading="loading" :search="search"
-                @update:options="loadItems" @click:row="clickItem">
-                <template v-slot:tfoot>
-                    <tr>
-                        <td colspan="2">
-                            <v-text-field v-model="search" class="ma-2" variant="outlined" density="compact" placeholder="search..."
-                                hide-details></v-text-field>
-                        </td>
-                    </tr>
+                :items-length="itemsLength" :loading="loading" :search="search" :key="tableKey"
+                @update:options="loadItems" @click:row="clickItem"
+                itemsPerPageText="# elementów na stronie" pageText="{0}-{1} z {2}">
+                <template #item.birthDate="{ item }">
+                    {{ new Date(item.birthDate).toLocaleDateString() }}
+                </template>
+                <template #footer.prepend>
+                    <v-text-field v-model="search" class="mr-5" variant="outlined" density="compact" placeholder="szukaj..."
+                        hide-details prepend-icon="mdi-magnify"></v-text-field>                   
                 </template>
             </v-data-table-server>
         </v-card-text>
     </v-card>
 
     <v-dialog v-model="editor" width="50%">
-        <PersonEditor :person="person" @close="editorClose" @list-changed="retrieve"/>
+        <PersonEditor :person="person" @close="editorClose" @list-changed="tableKey++"/>
     </v-dialog>
 </template>
 
