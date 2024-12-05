@@ -6,6 +6,12 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const uuid = require('uuid')
 const mongoose = require('mongoose')
+const expressSession = require('express-session')
+const passport = require('passport')
+const passportJson = require('passport-json')
+
+// własne moduły
+const auth = require('./auth')
 
 let config = {
     port: 8000,
@@ -23,6 +29,20 @@ app.use((err, req, res, next) => {
 })
 
 app.use(express.static(config.frontend))
+
+// inicjalizacja mechanizmów utrzymania sesji i autoryzacji
+app.use(expressSession({ secret: config.dbUrl, resave: false , saveUninitialized: true }))
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new passportJson.Strategy(auth.checkCredentials))
+passport.serializeUser(auth.serialize)
+passport.deserializeUser(auth.deserialize)
+
+// endpointy autentykacji
+const authEndpoint = '/api/auth'
+app.get(authEndpoint, auth.whoami)
+app.post(authEndpoint, passport.authenticate('json', { failWithError: true }), auth.login, auth.errorHandler)
+app.delete(authEndpoint, auth.logout)
 
 const personSchema = new mongoose.Schema({
     _id: { type: String, default: uuid.v4 },
