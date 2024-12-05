@@ -5,6 +5,7 @@
 
     export default {
         components: { PersonEditor },
+        props: [ 'user' ],
         emits: [ 'popup' ],
         data() {
             return {
