@@ -1,7 +1,10 @@
 <script>
+import common from '../mixins/common'
+
     export default {
         props: [ 'user' ],
-        emits: [ 'popup' ]
+        emits: [ 'popup' ],
+        mixins: [ common ]
     }
 </script>
 

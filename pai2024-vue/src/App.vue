@@ -1,10 +1,12 @@
 <script>
+import common from './mixins/common'
 import LoginDialog from './components/LoginDialog.vue'
 import LogoutDialog from './components/LogoutDialog.vue'
 
 const authEndpoint = '/api/auth'
 
 export default {
+  mixins: [ common ],
   components: { LoginDialog, LogoutDialog },
   data() {
     return {
@@ -65,7 +67,7 @@ export default {
 
       <v-list nav>
         <v-list-item href="/#/" prepend-icon="mdi-home" title="Pulpit" exact />
-        <v-list-item href="/#/persons" prepend-icon="mdi-account-tie-woman" title="Osoby" exact />
+        <v-list-item href="/#/persons" prepend-icon="mdi-account-tie-woman" title="Osoby" exact v-if="checkIfInRole(user, [0, 1])"/>
       </v-list>
 
       <v-spacer></v-spacer>
@@ -89,7 +91,7 @@ export default {
       <LogoutDialog @close="onLogin" />
     </v-dialog>
 
-    <v-snackbar v-model="snackbar.on" :color="snackbar.color">
+    <v-snackbar v-model="snackbar.on" :color="snackbar.color" :timeout="3000">
       <div style="width: 100%; text-align: center;">{{ snackbar.text }}</div>
     </v-snackbar>
 
