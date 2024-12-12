@@ -1,15 +1,18 @@
 <script>
-import PersonList from './components/PersonList.vue'
+import LoginDialog from './components/LoginDialog.vue'
+import LogoutDialog from './components/LogoutDialog.vue'
 
 const authEndpoint = '/api/auth'
 
 export default {
-  components: { PersonList },
+  components: { LoginDialog, LogoutDialog },
   data() {
     return {
       snackbar: { on: false },
       generalError: false,
-      user: {}
+      user: {},
+      loginDialog: false,
+      logoutDialog: false
     }
   },
   methods: {
@@ -17,26 +20,39 @@ export default {
       this.snackbar.text = text
       this.snackbar.color = color
       this.snackbar.on = true
+    },
+    onLogin(text, color = 'success') {
+      this.loginDialog = false
+      this.logoutDialog = false
+      if(color == 'success') {
+        this.whoami()
+      }
+      if(text) {
+        this.onPopup(text, color)
+      }
+    },
+    whoami() {
+      fetch(authEndpoint)
+      .then(res => {
+          if(!res.ok) {
+            this.generalError = true
+            return
+          }
+          res.json().then(data => {
+            if(data.sessionid) {
+              this.user = data
+            } else {
+              this.generalError = true
+            }
+          })
+      })
+      .catch(err => {
+        this.generalError = true
+      })
     }
   },
   mounted() {
-    fetch(authEndpoint)
-    .then(res => {
-        if(!res.ok) {
-          this.generalError = true
-          return
-        }
-        res.json().then(data => {
-          if(data.sessionid) {
-            this.user = data
-          } else {
-            this.generalError = true
-          }
-        })
-    })
-    .catch(err => {
-      this.generalError = true
-    })
+    this.whoami()
   }
 }
 </script>
@@ -51,11 +67,26 @@ export default {
         <v-list-item href="/#/persons" prepend-icon="mdi-account-tie-woman" title="Osoby" exact />
       </v-list>
 
+      <v-spacer></v-spacer>
+
+      <v-list nav>
+        <v-list-item key="Login" @click="loginDialog = true" @close="onLogin" prepend-icon="mdi-login" title="Login" exact v-if="!user.username"/>
+        <v-list-item key="Logout" @click="logoutDialog = true" @close="onLogin" prepend-icon="mdi-logout" title="Logout" exact v-if="user.username"/>
+      </v-list>
+
     </v-navigation-drawer>
 
     <v-main>
       <router-view @popup="onPopup" :user="user"></router-view>
     </v-main>
+
+    <v-dialog v-model="loginDialog" width="33%">
+      <LoginDialog @close="onLogin" />
+    </v-dialog>
+
+    <v-dialog v-model="logoutDialog" width="33%">
+      <LogoutDialog @close="onLogin" />
+    </v-dialog>
 
     <v-snackbar v-model="snackbar.on" :color="snackbar.color">
       <div style="width: 100%; text-align: center;">{{ snackbar.text }}</div>

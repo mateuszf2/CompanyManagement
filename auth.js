@@ -61,11 +61,11 @@ const auth = module.exports = {
             })
         }
         if(!req.isAuthenticated()) {
-            res.status(401).json({ error: 'Unauthorized' })
+            res.status(401).json({ error: 'Brak autoryzacji' })
         } else if(intersection.length > 0) {
             return nextTick()
         } else {
-            res.status(403).json({ error: 'Permission denied' })
+            res.status(403).json({ error: 'Dostęp zabroniony' })
         }
     },
 
@@ -77,7 +77,7 @@ const auth = module.exports = {
             if(user) {
                 return nextTick(null, user)
             } else {
-                return nextTick(new Error('No such user'), null)
+                return nextTick(new Error('Nie ma takiego użytkownika'), null)
             }
         })
         .catch(err => ({ error: err.message }))
@@ -98,7 +98,7 @@ const auth = module.exports = {
         res.json(data)
     },
 
-    errorHandler: (err, req, res, nextTick) => res.status(401).json({ error: err.message }),
+    errorHandler: (err, req, res, nextTick) => res.status(401).json({ error: `Błąd [${err.message}]'` }),
 
     getUsers: nextTick => {
         User.find()

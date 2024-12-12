@@ -7,6 +7,6 @@
 
 <template>
     <h1>Pulpit</h1>
-    <b v-if="user.username">{{ user.username }}</b>
+    <p v-if="user.username">{{ user.username }}</p>
     <i v-if="!user.username">niezalogowany</i>
 </template>
