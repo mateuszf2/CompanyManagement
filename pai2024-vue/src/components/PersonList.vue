@@ -37,9 +37,11 @@
                 fetch(personEndpoint + '?' + 
                     new URLSearchParams(queryString).toString())
                 .then(res => res.json().then(facet => {
-                    this.itemsLength = +facet.total
-                    this.serverItems = facet.data
-                    this.loading = false
+                    if(!facet.error) {
+                        this.itemsLength = +facet.total
+                        this.serverItems = facet.data
+                        this.loading = false
+                    }
                 }))
             },
             clickItem(item, event) {

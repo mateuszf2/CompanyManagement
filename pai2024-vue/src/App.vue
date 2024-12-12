@@ -26,6 +26,7 @@ export default {
       this.logoutDialog = false
       if(color == 'success') {
         this.whoami()
+        this.$router.push('/')
       }
       if(text) {
         this.onPopup(text, color)

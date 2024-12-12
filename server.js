@@ -67,7 +67,7 @@ const personSchema = new mongoose.Schema({
 const personEndpoint = '/api/person'
 let Person = null
 
-app.get(personEndpoint, (req, res) => {
+app.get(personEndpoint, auth.checkIfInRole([0, 1]), (req, res) => {
     // pobierz wszystkie rekordy z bazy do zmiennej person
     let sort = {}
     if(req.query.sort) {
@@ -106,7 +106,7 @@ app.get(personEndpoint, (req, res) => {
     })    
 })
 
-app.post(personEndpoint, (req, res) => {
+app.post(personEndpoint, auth.checkIfInRole([0]), (req, res) => {
     if(req.body) {
         // utwórz obiekt na podstawie req.body, zwaliduj go i zapisz do bazy
         const person = new Person(req.body)
@@ -125,7 +125,7 @@ app.post(personEndpoint, (req, res) => {
     }
 })
 
-app.put(personEndpoint, (req, res) => {
+app.put(personEndpoint, auth.checkIfInRole([0]), (req, res) => {
     if(req.body && req.body._id) {
         const _id = req.body._id
         delete req.body._id
@@ -139,7 +139,7 @@ app.put(personEndpoint, (req, res) => {
     }
 })
 
-app.delete(personEndpoint, (req, res) => {
+app.delete(personEndpoint, auth.checkIfInRole([0]), (req, res) => {
     if(req.query._id) {
         const _id = req.query._id
         Person.findOneAndDelete({ _id })
