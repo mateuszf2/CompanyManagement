@@ -1,16 +1,12 @@
+const getIntersection = (array1, array2) => {
+    const lookupSet = new Set(array2)
+    return array1.filter(element => lookupSet.has(element))
+}
+
 export default {
     methods: {
-        checkIfInRole(user, roleNums) {
-            let intersection = []
-            if(roleNums == null) {
-                intersection.push(-1)
-            } else {
-                roleNums.forEach(roleNum => {
-                    if(user && user.roles && user.roles.includes(roleNum)) {
-                        intersection.push(roleNum)
-                    }
-                })
-            }
+        checkIfInRole(session, roles) {
+            let intersection = getIntersection(session.roles || [], roles || [])
             return intersection.length > 0
         }
     }

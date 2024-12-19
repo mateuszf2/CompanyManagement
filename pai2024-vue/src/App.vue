@@ -66,7 +66,7 @@ export default {
     <v-navigation-drawer expand-on-hover rail permanent>
 
       <v-list nav>
-        <v-list-item v-for="route in $router.options.routes" :to="route.path" :title="route.title" :prepend-icon="route.icon" v-show="checkIfInRole(user, route.roles)" exact></v-list-item>
+        <v-list-item v-for="route in $router.options.routes" :to="route.path" :title="route.title" :prepend-icon="route.icon" v-show="!route.roles || checkIfInRole(user, route.roles)" exact></v-list-item>
       </v-list>
 
       <v-spacer></v-spacer>

@@ -13,6 +13,11 @@ const makeHash = password => {
     return crypto.createHash('sha256').update(password).digest('base64')
 }
 
+const getIntersection = (array1, array2) => {
+    const lookupSet = new Set(array2)
+    return array1.filter(element => lookupSet.has(element))
+}
+
 const auth = module.exports = {
 
     makeHash,
@@ -50,22 +55,13 @@ const auth = module.exports = {
     },
 
     checkIfInRole: roleNums => (req, res, nextTick) => {
-        let intersection = []
-        if(roleNums == null) {
-            intersection.push(-1)
-        } else {
-            roleNums.forEach(roleNum => {
-                if(req.user && req.user.roles && req.user.roles.includes(roleNum)) {
-                    intersection.push(roleNum)
-                }
-            })
-        }
+        let intersection = getIntersection(roleNums || [], req.user ? (req.user.roles || []) : [])
         if(!req.isAuthenticated()) {
-            res.status(401).json({ error: 'Brak autoryzacji' })
+            res.status(401).json({ error: 'Unauthorized' })
         } else if(intersection.length > 0) {
             return nextTick()
         } else {
-            res.status(403).json({ error: 'Dostęp zabroniony' })
+            res.status(403).json({ error: 'Permission denied' })
         }
     },
 
