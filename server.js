@@ -67,7 +67,7 @@ mongoose.connect(config.dbUrl)
 .then(conn => {
     console.log('Połączenie z bazą danych nawiązane')
 
-    auth.init()
+    auth.init(conn)
     person.init(conn)
     project.init(conn)
 
