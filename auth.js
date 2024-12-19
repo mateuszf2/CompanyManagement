@@ -13,35 +13,35 @@ const makeHash = password => {
     return crypto.createHash('sha256').update(password).digest('base64')
 }
 
-// stwórz admina jeśli nie istnieje
-User.findOne({ username: 'admin' })
-.then(user => {
-    if(!user) {
-        const admin = new User({ username: 'admin', password: makeHash('admin'), roles: [ 0 ] })
-        admin.save()
-    }
-})
-.catch(err => {
-    console.error(err.message)
-    process.exit(0)
-})
-
-// stwórz usera jeżeli nie istnieje
-User.findOne({ username: 'user' })
-.then(user => {
-    if(!user) {
-        const admin = new User({ username: 'user', password: makeHash('user'), roles: [ 1 ] })
-        admin.save()
-    }
-})
-.catch(err => {
-    console.error(err.message)
-    process.exit(0)
-})
-
 const auth = module.exports = {
 
     makeHash,
+
+    init: () => {
+        // stwórz admina jeśli nie istnieje
+        User.findOne({ username: 'admin' })
+            .then(user => {
+                if (!user) {
+                    const admin = new User({ username: 'admin', password: makeHash('admin'), roles: [0] })
+                    admin.save()
+                }
+            })
+            .catch(err => {
+                console.error(err.message)
+            })
+
+        // stwórz usera jeżeli nie istnieje
+        User.findOne({ username: 'user' })
+            .then(user => {
+                if (!user) {
+                    const admin = new User({ username: 'user', password: makeHash('user'), roles: [1] })
+                    admin.save()
+                }
+            })
+            .catch(err => {
+                console.error(err.message)
+            })
+    },
 
     checkCredentials: (username, password, nextTick) => {
         User.findOne({ username, password: auth.makeHash(password) })

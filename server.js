@@ -271,17 +271,19 @@ try {
     console.log('Konfiguracja domyślna')
 }
 
+console.log('Łączę się z bazą danych...')
 mongoose.connect(config.dbUrl)
 .then(conn => {
     console.log('Połączenie z bazą danych nawiązane')
+
+    auth.init()
     Person = conn.model('person', personSchema)
     Project = conn.model('project', projectSchema)
-})
-.catch(err => {
-    console.error('Połączenie z bazą danych nieudane', err)
-    process.exit(0)
-})
 
-app.listen(config.port, () => {
-    console.log('Backend słucha na porcie', config.port)
+    app.listen(config.port, () => {
+        console.log('Backend słucha na porcie', config.port)
+    })})
+.catch(err => {
+    console.error('Połączenie z bazą danych nieudane:', err.message)
+    process.exit(0)
 })
