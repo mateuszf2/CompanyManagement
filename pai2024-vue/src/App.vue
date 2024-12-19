@@ -66,9 +66,7 @@ export default {
     <v-navigation-drawer expand-on-hover rail permanent>
 
       <v-list nav>
-        <v-list-item to="/" prepend-icon="mdi-home" title="Pulpit" exact />
-        <v-list-item to="/persons" prepend-icon="mdi-account-tie-woman" title="Osoby" exact v-if="checkIfInRole(user, [0, 1])"/>
-        <v-list-item to="/projects" prepend-icon="mdi-projector" title="Projekty" exact v-if="checkIfInRole(user, [0, 1])"/>
+        <v-list-item v-for="route in $router.options.routes" :to="route.path" :title="route.title" :prepend-icon="route.icon" v-show="checkIfInRole(user, route.roles)" exact></v-list-item>
       </v-list>
 
       <v-spacer></v-spacer>

@@ -28,9 +28,9 @@ import ProjectList from './components/ProjectList.vue'
 const router = createRouter({
     history: createWebHashHistory(),
     routes: [
-        { path: '/', component: Dashboard },
-        { path: '/persons', component: PersonList },
-        { path: '/projects', component: ProjectList }
+        { path: '/', component: Dashboard, title: 'Pulpit', icon: 'mdi-home' },
+        { path: '/persons', component: PersonList, title: 'Osoby', icon: 'mdi-account-tie-woman', roles: [0, 1] },
+        { path: '/projects', component: ProjectList, title: 'Projekty', icon: 'mdi-projector', roles: [0, 1] }
     ]
 })
 
