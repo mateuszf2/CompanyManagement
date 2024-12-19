@@ -68,6 +68,7 @@ export default {
       <v-list nav>
         <v-list-item to="/" prepend-icon="mdi-home" title="Pulpit" exact />
         <v-list-item to="/persons" prepend-icon="mdi-account-tie-woman" title="Osoby" exact v-if="checkIfInRole(user, [0, 1])"/>
+        <v-list-item to="/projects" prepend-icon="mdi-projector" title="Projekty" exact v-if="checkIfInRole(user, [0, 1])"/>
       </v-list>
 
       <v-spacer></v-spacer>
