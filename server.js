@@ -71,7 +71,7 @@ app.get(personEndpoint, auth.checkIfInRole([0, 1]), (req, res) => {
     // pobierz wszystkie rekordy z bazy do zmiennej person
     let sort = {}
     if(req.query.sort) {
-        sort[req.query.sort] = +req.query.order || 1
+        sort[req.query.sort] = req.query.order == 'desc' ? -1 : 1
     }
     const matching = {
         $match: {
@@ -184,7 +184,7 @@ app.get(projectEndpoint, auth.checkIfInRole([0, 1]), (req, res) => {
     // pobierz wszystkie rekordy z bazy do zmiennej project
     let sort = {}
     if(req.query.sort) {
-        sort[req.query.sort] = +req.query.order || 1
+        sort[req.query.sort] = req.query.order == 'desc' ? -1 : 1
     }
     const matching = {
         $match: { name: { $regex: req.query.search || '' }}
