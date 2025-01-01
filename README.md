@@ -1,5 +1,16 @@
 # pai2024
 
+## Zadanie zaliczeniowe
+
+### Część obowiązkowa (na 3)
+Rozszerzyć model o zadania wg zasady, że każdy projekt składa się z zestawu zadań posiadających nazwę, datę rozpoczęcia i opcjonalną datę zakończenia (jej ustawienie oznacza że zadanie zostało zakończone) oraz zbiór osób realizujących. GUI do zarządzania zadaniami nie jest odrębną pozycją nawigacji, można je wywołać nowym przyciskiem [Zadania] wewnątrz dialogu do edycji projektu. Ten nowy dialog modalny pozwala na dodawanie, edycję i usuwanie zadań z projektu. Zbiór wykonawców jest realizowany przez wybór wielokrotny.
+
+### Na 4
+Nowa pozycja nawigacji, "Analiza", dostępna dla roli 0. Widok zawiera diagram Gantta wszystkich projektów na podstawie ich daty startu i końca. Dodatkowo, po wybraniu jednego projektu za pomocą comboboxa, pokazuje się drugi diagram Gantta dla zadań w projekcie. W obu diagramach projekty i zadania niezakończone są wyróżnione i "trwają" do aktualnego dnia.
+
+### Na 5
+Diagramy z punktu 4 automatycznie odświeżają się w przypadku gdy ktoś z innej sesji przeglądarkowej zmodyfikuje odpowiednie dane.
+
 ## Pobranie/aktualizacja projektu
 
 Pobranie ostatniej wersji do nowego katalogu ``pai2024``
