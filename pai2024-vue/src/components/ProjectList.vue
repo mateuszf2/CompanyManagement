@@ -17,9 +17,9 @@
                 itemsPerPage: 10,
                 headers: [
                         { title: 'Nazwa', key: 'name', align: 'start', sortable: true },
-                        { title: 'Data startu', key: 'startDate', align: 'end' },
-                        { title: 'Data końca', key: 'endDate', align: 'end' },
-                        { title: 'Wykonawcy', key: 'contractors', align: 'start' }
+                        { title: 'Data startu', key: 'startDate', align: 'end', sortable: true  },
+                        { title: 'Data końca', key: 'endDate', align: 'end', sortable: true  },
+                        { title: 'Wykonawcy', key: 'contractors', align: 'start', sortable: false  }
                     ],
                 loading: false,
                 search: '',
