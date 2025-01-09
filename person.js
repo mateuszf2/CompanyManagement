@@ -21,12 +21,12 @@ const schema = new mongoose.Schema({
     additionalProperties: false
 })
 
-module.exports = {
+const person = module.exports = {
     endpoint: '/api/person',
     model: null,
     
     init: conn => {
-        this.model = conn.model('person', schema)
+        person.model = conn.model('person', schema)
     },
 
     get: (req, res) => {
@@ -57,14 +57,14 @@ module.exports = {
         if(limit > 0) {
             aggregation.push({ $limit: limit })
         }
-        this.model.aggregate([{ $facet: {
+        person.model.aggregate([{ $facet: {
             total: [ matching, { $count: 'count' } ],
             data: aggregation
         }}])
         .then(facet => {
             [ facet ] = facet
             facet.total = ( facet.total && facet.total[0] ? facet.total[0].count : 0) || 0
-            facet.data = facet.data.map(person => new this.model(person))
+            facet.data = facet.data.map(item => new person.model(item))
             res.json(facet)
         })
         .catch(err => {
@@ -74,20 +74,19 @@ module.exports = {
 
     post: (req, res) => {
         if(req.body) {
-            // utwórz obiekt na podstawie req.body, zwaliduj go i zapisz do bazy
-            const person = new this.model(req.body)
-            const err = person.validateSync()
+            const item = new person.model(req.body)
+            const err = item.validateSync()
             if(err) {
                 res.status(400).json({ error: err.message })
                 return
             }
-            person.save()
-            .then(personAdded => {
-                res.json(personAdded)
+            item.save()
+            .then(itemAdded => {
+                res.json(itemAdded)
             })
-            .catch(err => res.status(400).json({ error: err.message, set: false }))
+            .catch(err => res.status(400).json({ error: err.message }))
         } else {
-            res.status(400).json({ error: 'Brak danych', set: false })
+            res.status(400).json({ error: 'Brak danych' })
         }
     },
 
@@ -95,9 +94,9 @@ module.exports = {
         if(req.body && req.body._id) {
             const _id = req.body._id
             delete req.body._id
-            this.model.findOneAndUpdate({ _id }, { $set: req.body }, { new: true, runValidators: true })
-            .then(personUpdated => {
-                res.json(personUpdated)
+            person.model.findOneAndUpdate({ _id }, { $set: req.body }, { new: true, runValidators: true })
+            .then(itemUpdated => {
+                res.json(itemUpdated)
             })
             .catch(err => res.status(400).json({ error: err.message }))
         } else {
@@ -108,9 +107,9 @@ module.exports = {
     delete: (req, res) => {
         if(req.query._id) {
             const _id = req.query._id
-            this.model.findOneAndDelete({ _id })
-            .then(personDeleted => {
-                res.json(personDeleted)
+            person.model.findOneAndDelete({ _id })
+            .then(itemDeleted => {
+                res.json(itemDeleted)
             })
             .catch(err => res.status(400).json({ error: err.message }))
         } else {

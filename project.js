@@ -23,12 +23,12 @@ const schema = new mongoose.Schema({
     additionalProperties: false
 })
 
-module.exports = {
+const project = module.exports = {
     endpoint: '/api/project',
     model: null,
     
     init: conn => {
-        this.model = conn.model('project', schema)
+        project.model = conn.model('project', schema)
     },
 
     get: (req, res) => {
@@ -62,16 +62,16 @@ module.exports = {
                 as: 'contractors'
             }
         })
-        this.model.aggregate([{ $facet: {
+        project.model.aggregate([{ $facet: {
             total: [ matching, { $count: 'count' } ],
             data: aggregation
         }}])
         .then(facet => {
             [ facet ] = facet
             facet.total = ( facet.total && facet.total[0] ? facet.total[0].count : 0) || 0
-            facet.data = facet.data.map(project => {
-                const newItem = new this.model(project).toObject()
-                newItem.contractors = project.contractors.map(item => item.firstName.charAt(0) + item.lastName.charAt(0))
+            facet.data = facet.data.map(item => {
+                const newItem = new project.model(item).toObject()
+                newItem.contractors = item.contractors.map(item => item.firstName.charAt(0) + item.lastName.charAt(0))
                 return newItem
             })
             res.json(facet)
@@ -84,19 +84,19 @@ module.exports = {
     post: (req, res) => {
         if(req.body) {
             // utwórz obiekt na podstawie req.body, zwaliduj go i zapisz do bazy
-            const project = new this.model(req.body)
-            const err = project.validateSync()
+            const item = new project.model(req.body)
+            const err = item.validateSync()
             if(err) {
                 res.status(400).json({ error: err.message })
                 return
             }
-            project.save()
-            .then(projectAdded => {
-                res.json(projectAdded)
+            item.save()
+            .then(itemAdded => {
+                res.json(itemAdded)
             })
-            .catch(err => res.status(400).json({ error: err.message, set: false }))
+            .catch(err => res.status(400).json({ error: err.message }))
         } else {
-            res.status(400).json({ error: 'Brak danych', set: false })
+            res.status(400).json({ error: 'Brak danych' })
         }
     },
 
@@ -104,9 +104,9 @@ module.exports = {
         if(req.body && req.body._id) {
             const _id = req.body._id
             delete req.body._id
-            this.model.findOneAndUpdate({ _id }, { $set: req.body }, { new: true, runValidators: true })
-            .then(projectUpdated => {
-                res.json(projectUpdated)
+            project.model.findOneAndUpdate({ _id }, { $set: req.body }, { new: true, runValidators: true })
+            .then(itemUpdated => {
+                res.json(itemUpdated)
             })
             .catch(err => res.status(400).json({ error: err.message }))
         } else {
@@ -117,9 +117,9 @@ module.exports = {
     delete: (req, res) => {
         if(req.query._id) {
             const _id = req.query._id
-            this.model.findOneAndDelete({ _id })
-            .then(projectDeleted => {
-                res.json(projectDeleted)
+            project.model.findOneAndDelete({ _id })
+            .then(itemDeleted => {
+                res.json(itemDeleted)
             })
             .catch(err => res.status(400).json({ error: err.message }))
         } else {

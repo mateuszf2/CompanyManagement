@@ -36,7 +36,10 @@
                 if(sortBy && sortBy[0]) {
                     queryString.sort = sortBy[0].key
                     queryString.order = sortBy[0].order
-                }            
+                } else {
+                    queryString.sort = 'name'
+                    queryString.order = 'asc'
+                }         
                 fetch(projectEndpoint + '?' + 
                     new URLSearchParams(queryString).toString())
                 .then(res => res.json().then(facet => {
