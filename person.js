@@ -1,6 +1,8 @@
 const uuid = require('uuid')
 const mongoose = require('mongoose')
 
+const project = require('./project')
+
 const schema = new mongoose.Schema({
     _id: { type: String, default: uuid.v4 },
     firstName: { type: String, required: true, validate: {
@@ -57,6 +59,14 @@ const person = module.exports = {
         if(limit > 0) {
             aggregation.push({ $limit: limit })
         }
+        aggregation.push({
+            $lookup: {
+                from: 'projects',
+                localField: '_id',
+                foreignField: 'contractor_ids',
+                as: 'projects'
+            }
+        })
         person.model.aggregate([{ $facet: {
             total: [ matching, { $count: 'count' } ],
             data: aggregation
@@ -64,7 +74,11 @@ const person = module.exports = {
         .then(facet => {
             [ facet ] = facet
             facet.total = ( facet.total && facet.total[0] ? facet.total[0].count : 0) || 0
-            facet.data = facet.data.map(item => new person.model(item))
+            facet.data = facet.data.map(item => {
+                const newItem = new person.model(item).toObject()
+                newItem.projects = item.projects ? item.projects.length : 0               
+                return newItem
+            })
             res.json(facet)
         })
         .catch(err => {
@@ -107,11 +121,16 @@ const person = module.exports = {
     delete: (req, res) => {
         if(req.query._id) {
             const _id = req.query._id
-            person.model.findOneAndDelete({ _id })
-            .then(itemDeleted => {
-                res.json(itemDeleted)
-            })
-            .catch(err => res.status(400).json({ error: err.message }))
+            project.model.updateMany(
+                { contractor_ids: _id },
+                { $pull: { contractor_ids: _id } }
+            ).then(() => {
+                person.model.findOneAndDelete({ _id })
+                .then(itemDeleted => {
+                    res.json(itemDeleted)
+                })
+                .catch(err => res.status(400).json({ error: err.message }))    
+            }).catch(err => res.status(400).json({ error: err.message }))
         } else {
             res.status(400).json({ error: 'Brak danych do usunięcia' })
         }

@@ -18,7 +18,8 @@
                 headers: [
                         { title: 'Imię', key: 'firstName', align: 'start', sortable: true },
                         { title: 'Nazwisko', key: 'lastName', align: 'start', sortable: true },
-                        { title: 'Data urodzenia', key: 'birthDate', align: 'end' }
+                        { title: 'Data urodzenia', key: 'birthDate', align: 'end' },
+                        { title: 'Projektów', key: 'projects', align: 'end' }
                     ],
                 loading: false,
                 search: '',
