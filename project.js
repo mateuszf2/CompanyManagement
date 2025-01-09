@@ -16,7 +16,8 @@ const schema = new mongoose.Schema({
         validator: value => !!(new Date()),
         message: props => `${props.value} nie jest prawidłową datą urodzenia`
         }, transform: value => value.toISOString().substr(0, 10)
-    }
+    },
+    contractor_ids: { type: [ String ], required: false, default: [] }
 }, {
     versionKey: false,
     additionalProperties: false
@@ -53,6 +54,14 @@ module.exports = {
         if(limit > 0) {
             aggregation.push({ $limit: limit })
         }
+        aggregation.push({
+            $lookup: {
+                from: 'people',
+                localField: 'contractor_ids',
+                foreignField: '_id',
+                as: 'contractors'
+            }
+        })
         this.model.aggregate([{ $facet: {
             total: [ matching, { $count: 'count' } ],
             data: aggregation
@@ -60,7 +69,11 @@ module.exports = {
         .then(facet => {
             [ facet ] = facet
             facet.total = ( facet.total && facet.total[0] ? facet.total[0].count : 0) || 0
-            facet.data = facet.data.map(project => new this.model(project))
+            facet.data = facet.data.map(project => {
+                const newItem = new this.model(project).toObject()
+                newItem.contractors = project.contractors.map(item => item.firstName.charAt(0) + item.lastName.charAt(0))
+                return newItem
+            })
             res.json(facet)
         })
         .catch(err => {

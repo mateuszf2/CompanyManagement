@@ -1,6 +1,7 @@
 <script>
 
     const projectEndpoint = '/api/project'
+    const personEndpoint = '/api/person'
 
     export default {
         data() {
@@ -16,7 +17,8 @@
                         const date = new Date(value)
                         return !!date || `Wymagana prawidłowa data`
                     }
-                }
+                },
+                persons: []
             }
         },
         props: [ 'project' ],
@@ -91,6 +93,13 @@
         },
         mounted() {
             Object.assign(this.input, this.project)
+            fetch(personEndpoint + '?' + 
+                    new URLSearchParams({ sort: 'lastName', order: 1 }).toString())
+                .then(res => res.json().then(facet => {
+                    if(!facet.error) {
+                        this.persons = facet.data
+                    }
+                }))
         }
     }
 </script>
@@ -109,6 +118,14 @@
                 </v-text-field>
                 <v-text-field type="date" variant="outlined" label="Data końca" v-model="input.endDate" :rules="[ rules.validDate ]">
                 </v-text-field>
+                <v-autocomplete variant="outlined"
+                    v-model="input.contractor_ids"
+                    :items="persons"
+                    :item-title="item => item.firstName + ' ' + item.lastName"
+                    item-value="_id"
+                    label="Wykonawcy"
+                    multiple chips
+                ></v-autocomplete>
             </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>

@@ -18,7 +18,8 @@
                 headers: [
                         { title: 'Nazwa', key: 'name', align: 'start', sortable: true },
                         { title: 'Data startu', key: 'startDate', align: 'end' },
-                        { title: 'Data końca', key: 'endDate', align: 'end' }
+                        { title: 'Data końca', key: 'endDate', align: 'end' },
+                        { title: 'Wykonawcy', key: 'contractors', align: 'start' }
                     ],
                 loading: false,
                 search: '',
@@ -78,6 +79,9 @@
                 itemsPerPageText="# elementów na stronie" pageText="{0}-{1} z {2}">
                 <template #item.birthDate="{ item }">
                     {{ new Date(item.birthDate).toLocaleDateString() }}
+                </template>
+                <template #item.contractors="{ item }">
+                    {{ item.contractors.join(' ') }}
                 </template>
                 <template #footer.prepend>
                     <v-text-field v-model="search" class="mr-5" variant="outlined" density="compact" placeholder="szukaj..."
