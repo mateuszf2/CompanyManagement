@@ -8,9 +8,11 @@ const mongoose = require('mongoose')
 const expressSession = require('express-session')
 const passport = require('passport')
 const passportJson = require('passport-json')
+const expressWs = require('express-ws')
 
 // własne moduły
 const auth = require('./auth')
+const websocket = require('./websocket')
 const person = require('./person')
 const project = require('./project')
 
@@ -32,12 +34,18 @@ app.use((err, req, res, next) => {
 app.use(express.static(config.frontend))
 
 // inicjalizacja mechanizmów utrzymania sesji i autoryzacji
-app.use(expressSession({ secret: config.dbUrl, resave: false , saveUninitialized: true }))
+const session = expressSession({ secret: config.dbUrl, resave: false , saveUninitialized: true })
+app.use(session)
 app.use(passport.initialize())
 app.use(passport.session())
 passport.use(new passportJson.Strategy(auth.checkCredentials))
 passport.serializeUser(auth.serialize)
 passport.deserializeUser(auth.deserialize)
+
+// endpoint websocketu
+const wsEndpoint = '/ws'
+expressWs(app)
+app.ws(wsEndpoint, (_ws, req, next) => session(req, {}, next), websocket)
 
 // endpointy autentykacji
 const authEndpoint = '/api/auth'
