@@ -9,8 +9,6 @@ const schema = new mongoose.Schema({
     roles: { type: [ Number ] }
 }, { versionKey: false })
 
-let User = null
-
 const makeHash = password => {
     return crypto.createHash('sha256').update(password).digest('base64')
 }
@@ -20,16 +18,17 @@ const getIntersection = (array1, array2) => {
     return array1.filter(element => lookupSet.has(element))
 }
 
-module.exports = {
+const auth = module.exports = {
 
     makeHash,
+    User: null,
 
     init: conn => {
 
-        User = conn.model('user', schema)
+        auth.User = conn.model('user', schema)
 
         // stwórz admina jeśli nie istnieje
-        User.findOne({ username: 'admin' })
+        auth.User.findOne({ username: 'admin' })
             .then(user => {
                 if (!user) {
                     const admin = new User({ username: 'admin', password: makeHash('admin'), roles: [0] })
@@ -42,7 +41,7 @@ module.exports = {
             })
 
         // stwórz usera jeżeli nie istnieje
-        User.findOne({ username: 'user' })
+        auth.User.findOne({ username: 'user' })
             .then(user => {
                 if (!user) {
                     const admin = new User({ username: 'user', password: makeHash('user'), roles: [1] })
@@ -56,7 +55,7 @@ module.exports = {
     },
 
     checkCredentials: (username, password, nextTick) => {
-        User.findOne({ username, password: makeHash(password) })
+        auth.User.findOne({ username, password: makeHash(password) })
         .then(user => nextTick(null, user || false))
         .catch(err => nextTick(null, false))
     },
@@ -75,7 +74,7 @@ module.exports = {
     serialize: (user, nextTick) => nextTick(null, user.username),
 
     deserialize: (username, nextTick) => {
-        User.findOne({ username })
+        auth.User.findOne({ username })
         .then(user => {
             if(user) {
                 return nextTick(null, user)
@@ -86,9 +85,9 @@ module.exports = {
         .catch(err => ({ error: err.message }))
     },
 
-    login: (req, res) => module.exports.whoami(req, res),
+    login: (req, res) => auth.whoami(req, res),
 
-    logout: (req, res) => req.logout(() => module.exports.whoami(req, res) ),
+    logout: (req, res) => req.logout(() => auth.whoami(req, res) ),
 
     whoami: (req, res) => {
         req.session.roles = req.user ? req.user.roles : []
@@ -102,16 +101,4 @@ module.exports = {
     },
 
     errorHandler: (err, req, res, nextTick) => res.status(401).json({ error: `Błąd [${err.message}]'` }),
-
-    getUsers: nextTick => {
-        User.find()
-        .then(users => {
-            users.forEach(user => {
-                delete user._id
-                user.password = user.password ? 1 : 0
-            })
-            nextTick(null, users)
-        })
-        .catch(err => nextTick(err, null))
-    }
 }

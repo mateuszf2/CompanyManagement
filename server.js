@@ -13,6 +13,7 @@ const expressWs = require('express-ws')
 // własne moduły
 const auth = require('./auth')
 const websocket = require('./websocket')
+const control = require('./control')
 const person = require('./person')
 const project = require('./project')
 
@@ -45,13 +46,17 @@ passport.deserializeUser(auth.deserialize)
 // endpoint websocketu
 const wsEndpoint = '/ws'
 expressWs(app)
-app.ws(wsEndpoint, (_ws, req, next) => session(req, {}, next), websocket)
+app.ws(wsEndpoint, (_ws, req, next) => session(req, {}, next), websocket.handle)
 
 // endpointy autentykacji
 const authEndpoint = '/api/auth'
 app.get(authEndpoint, auth.whoami)
 app.post(authEndpoint, passport.authenticate('json', { failWithError: true }), auth.login, auth.errorHandler)
 app.delete(authEndpoint, auth.logout)
+
+// endpointy stanu systemu
+const whoEndpoint = '/api/control'
+app.get(whoEndpoint + '/who', auth.checkIfInRole([0, 1]), control.whoGet)
 
 app.get(person.endpoint, auth.checkIfInRole([0, 1]), person.get)
 app.post(person.endpoint, auth.checkIfInRole([0]), person.post)
