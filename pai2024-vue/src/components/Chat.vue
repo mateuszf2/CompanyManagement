@@ -6,13 +6,24 @@ export default {
             websocket: null,
             recipient: '',
             message: '',
-            posts: []
+            posts: [],
+            users: []
         }
     },
     methods: {
         send() {
-            this.websocket.send(JSON.stringify({ from: this.user.username, to: this.recipient, message: this.message }))
+            const data = { from: this.user.username, to: this.recipient, message: this.message }
+            if(data.to != this.user.username) {
+                this.websocket.send(JSON.stringify(data))
+            }
+            this.posts.push({ time: Date.now(), ...data })
             this.message = ''
+        },
+        loadUsers() {
+            fetch('/api/control/who').then(res => res.json().then(users => {
+            this.users = Object.keys(users).map(key => (
+                { username: key, status: users[key].websocket ? 2 : (users[key].sessions > 0 ? 1 : 0 ) }
+            ))}))
         }
     },
     mounted() {
@@ -39,19 +50,29 @@ export default {
         <v-card-title>Chat</v-card-title>
         <v-card-text>
             <v-list>
-                <v-list-item v-for="post in posts">{{ new Date(post.time).toLocaleTimeString() }} @{{ post.from}} {{ post.message }}</v-list-item>
+                <v-list-item v-for="post in posts" variant="elevated" rounded="pill"
+                    :class="post.from == user.username ? 'right-msg' : 'left-msg'">
+                    <v-list-item-title>{{ post.message }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ new Date(post.time).toLocaleTimeString() }} @{{ post.from }}</v-list-item-subtitle>
+                </v-list-item>
             </v-list>
         </v-card-text>
         <v-card-actions>
             <v-form style="width: 100%;">
                 <v-row>
                 <v-col cols="4">
-                    <v-text-field variant="solo" v-model="recipient" label="Odbiorca"></v-text-field> 
+                    <v-select variant="solo" v-model="recipient" label="Odbiorca"
+                        :items="users" item-title="username" item-value="username" @update:menu="loadUsers">
+                        <template #item="{ item, props }">
+                            <v-list-item v-bind="props" :style="{ color: ['gray', 'orange', 'green'][item.raw.status] }">
+                            </v-list-item>
+                        </template>
+                    </v-select> 
                 </v-col>
                 <v-col>
                 <v-text-field variant="solo" label="Wiadomość" v-model="message">
                     <template #append-inner>
-                        <v-btn variant="elevated" color="success" @click="send" type="submit">Wyślij</v-btn>
+                        <v-btn variant="elevated" color="success" @click="send" type="submit" :disabled="!recipient || !message">Wyślij</v-btn>
                     </template>
                 </v-text-field>
                 </v-col>
@@ -62,4 +83,6 @@ export default {
 </template>
   
 <style scoped>
+.left-msg { color: black; text-align: left; }
+.right-msg { color: green; text-align: right; }
 </style>
