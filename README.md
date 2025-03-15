@@ -1,51 +1,53 @@
-# pai2024
+# CompanyManagement :office:
 
-## Zadanie zaliczeniowe
+CompanyManagement is an academic project that facilitates the management of people, projects and tasks in the company.
+It uses JavaScript, Node.js, Express.js, Vite.js, Vue.js, Mongoose.js. 
 
-### Część obowiązkowa (na 3)
-Rozszerzyć model o zadania wg zasady, że każdy projekt składa się z zestawu zadań posiadających nazwę, datę rozpoczęcia i opcjonalną datę zakończenia (jej ustawienie oznacza że zadanie zostało zakończone) oraz zbiór osób realizujących. GUI do zarządzania zadaniami nie jest odrębną pozycją nawigacji, można je wywołać nowym przyciskiem [Zadania] wewnątrz dialogu do edycji projektu. Ten nowy dialog modalny pozwala na dodawanie, edycję i usuwanie zadań z projektu. Zbiór wykonawców jest realizowany przez wybór wielokrotny.
 
-### Na 4
-Nowa pozycja nawigacji, "Analiza", dostępna dla roli 0. Widok zawiera diagram Gantta wszystkich projektów na podstawie ich daty startu i końca. Dodatkowo, po wybraniu jednego projektu za pomocą comboboxa, pokazuje się drugi diagram Gantta dla zadań w projekcie. W obu diagramach projekty i zadania niezakończone są wyróżnione i "trwają" do aktualnego dnia.
+![people](https://github.com/user-attachments/assets/b3bf9a63-5821-4d6f-b478-71aa1fd34802)
+![projects](https://github.com/user-attachments/assets/ae1efaf1-1cea-4031-997f-07cdcaaa0ab9)
+![tasks](https://github.com/user-attachments/assets/acaf9175-133e-4acc-92bb-ff79ed019f9c)
+![charts](https://github.com/user-attachments/assets/e494d8f4-5d0c-4180-8c88-9755e86fb1ae)
+![chat](https://github.com/user-attachments/assets/9d8957b2-67ba-435f-85a4-e7d18e64a057)
+![GanttDiagram](https://github.com/user-attachments/assets/5c848489-1604-4c4e-b511-80e07aa65343)
+![GanttDiagram2](https://github.com/user-attachments/assets/a6b33990-0e2f-4ad8-acc9-d3f844577040)
 
-### Na 5
-Diagramy z punktu 4 automatycznie odświeżają się w przypadku gdy ktoś z innej sesji przeglądarkowej zmodyfikuje odpowiednie dane.
+## Features :star2:
+- Panel to manage projects and tasks (CRUD operations)
+- Chat functionality with WebSockets
+- Analyzing data in time
 
-## Pobranie/aktualizacja projektu
+## Installation :hammer_and_wrench:
 
-Pobranie ostatniej wersji do nowego katalogu ``pai2024``
-```
-git clone https://gitlab.com/mariusz.jarocki/pai2024.git
-```
-Aktualizacja posiadanego kodu do ostatniej wersji
-```
-cd pai2024
-git reset
-git pull
-```
+What you need:
+- Visual Studio Code IDE
+- Node.js
+- npm (Node Package Manager) installed automatically with Node.js.
 
-## Instalacja zależności
-```
+Download dependencies:
+```bash
 npm install
 cd pai2024-vue
 npm install
 ```
 
-## Uruchomienie backendu
-```
+Start backend:
+```bash
 npm start
 ```
-Backend będzie dostępny pod adresem http://localhost:8000
 
-## Kompilacja frontendu do wersji produkcyjnej
-```
+Compiling the frontend to production:
+```bash
 cd pai2024-vue
 npm run build
 ```
 
-## Uruchomienie serwera frontendu developerskiego
-```
+Launching the frontend development server:
+```bash
 cd pai2024-vue
 npm run dev
 ```
-Serwer będzie dostępny pod adresem http://localhost:5173
+
+
+## License :page_with_curl:
+CompanyManagement is licensed under the GNU General Public License v3.0
