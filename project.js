@@ -1,5 +1,6 @@
 const uuid = require('uuid')
 const mongoose = require('mongoose')
+const websocket = require('./websocket')
 
 const schema = new mongoose.Schema({
     _id: { type: String, default: uuid.v4 },
@@ -69,6 +70,7 @@ const project = module.exports = {
         .then(facet => {
             [ facet ] = facet
             facet.total = ( facet.total && facet.total[0] ? facet.total[0].count : 0) || 0
+            console.log("facet.data PROJECT.JS:", facet.data);
             facet.data = facet.data.map(item => {
                 const newItem = new project.model(item).toObject()
                 newItem.contractors = item.contractors.map(item => item.firstName.charAt(0) + item.lastName.charAt(0))
@@ -92,6 +94,13 @@ const project = module.exports = {
             }
             item.save()
             .then(itemAdded => {
+                const message = {
+                    action: 'create', // Możesz to dostosować w zależności od operacji
+                    type: 'project_update',
+                    data: itemAdded
+                }
+                websocket.handleMessageToClients(message)
+
                 res.json(itemAdded)
             })
             .catch(err => res.status(400).json({ error: err.message }))
@@ -106,6 +115,12 @@ const project = module.exports = {
             delete req.body._id
             project.model.findOneAndUpdate({ _id }, { $set: req.body }, { new: true, runValidators: true })
             .then(itemUpdated => {
+                const message = {
+                    action: 'update',
+                    type: 'project_update',
+                    data: itemUpdated
+                }
+                websocket.handleMessageToClients(message)
                 res.json(itemUpdated)
             })
             .catch(err => res.status(400).json({ error: err.message }))
@@ -119,6 +134,12 @@ const project = module.exports = {
             const _id = req.query._id
             project.model.findOneAndDelete({ _id })
             .then(itemDeleted => {
+                const message = {
+                    action: 'delete',
+                    type: 'project_update',
+                    data: itemDeleted
+                }
+                websocket.handleMessageToClients(message)
                 res.json(itemDeleted)
             })
             .catch(err => res.status(400).json({ error: err.message }))

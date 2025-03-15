@@ -16,6 +16,7 @@ const websocket = require('./websocket')
 const control = require('./control')
 const person = require('./person')
 const project = require('./project')
+const task = require('./task')
 
 let config = {
     port: 8000,
@@ -68,6 +69,11 @@ app.post(project.endpoint, auth.checkIfInRole([0]), project.post)
 app.put(project.endpoint, auth.checkIfInRole([0]), project.put)
 app.delete(project.endpoint, auth.checkIfInRole([0]), project.delete)
 
+app.get(task.endpoint, auth.checkIfInRole([0, 1]), task.get)
+app.post(task.endpoint, auth.checkIfInRole([0]), task.post)
+app.put(task.endpoint, auth.checkIfInRole([0]), task.put)
+app.delete(task.endpoint, auth.checkIfInRole([0]), task.delete)
+
 try {
     config = JSON.parse(fs.readFileSync('config.json'))
     console.log('Konfiguracja z config.json')
@@ -83,6 +89,7 @@ mongoose.connect(config.dbUrl)
     auth.init(conn)
     person.init(conn)
     project.init(conn)
+    task.init(conn)
 
     app.listen(config.port, () => {
         console.log('Backend słucha na porcie', config.port)

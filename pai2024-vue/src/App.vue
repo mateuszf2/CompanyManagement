@@ -86,6 +86,7 @@ export default {
       <LoginDialog @close="onLogin" />
     </v-dialog>
 
+
     <v-dialog v-model="logoutDialog" width="33%">
       <LogoutDialog @close="onLogin" />
     </v-dialog>

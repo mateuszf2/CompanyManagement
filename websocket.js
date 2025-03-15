@@ -37,5 +37,15 @@ module.exports = {
                 delete websocketMap[ws.sessionID]
             })
         })
+    },
+    handleMessageToClients: (message) => {
+        // Wysłanie wiadomości do wszystkich połączonych klientów
+        Object.values(websocketMap).forEach(ws => {
+            try {
+                ws.send(JSON.stringify(message))
+            } catch(err) {
+                console.error('Websocket send error', err.message)
+            }
+        })
     }
 }

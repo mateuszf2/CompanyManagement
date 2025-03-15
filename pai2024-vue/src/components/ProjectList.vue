@@ -94,8 +94,8 @@
         </v-card-text>
     </v-card>
 
-    <v-dialog v-model="editor" width="50%" v-if="checkIfInRole(user, [0])">
-        <ProjectEditor :project="project" @close="editorClose" @list-changed="tableKey++"/>
+    <v-dialog v-model="editor" width="60%" v-if="checkIfInRole(user, [0])">
+        <ProjectEditor :user="user" :project="project" @close="editorClose" @list-changed="tableKey++"/>
     </v-dialog>
 </template>
 
