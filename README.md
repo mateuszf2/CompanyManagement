@@ -14,6 +14,7 @@ It uses JavaScript, Node.js, Express.js, Vite.js, Vue.js, Mongoose.js.
 
 ## Features :star2:
 - Panel to manage projects and tasks (CRUD operations)
+- Server-side tables
 - Chat functionality with WebSockets
 - Analyzing data in time
 
